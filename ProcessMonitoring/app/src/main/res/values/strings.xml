@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ProcessMonitoring</string>
+    <string name="btn_send">Send</string>
 </resources>

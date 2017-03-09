@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "892245693124",
+    "firebase_url": "https://processmonitoring-13707.firebaseio.com",
+    "project_id": "processmonitoring-13707",
+    "storage_bucket": "processmonitoring-13707.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:892245693124:android:da25d5a024ef450a",
+        "android_client_info": {
+          "package_name": "com.apriorit.android.processmonitoring"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "892245693124-jefoihko08pqru6skueo2n4v8hm0rel2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDt7nVXLMsCIUZCaNG8ntWCxNi0rDdjPKw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
