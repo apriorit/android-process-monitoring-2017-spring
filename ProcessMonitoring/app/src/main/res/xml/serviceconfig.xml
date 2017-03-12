@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- pacageNames -  список приложений из Black List-->
+<accessibility-service
+    android:accessibilityEventTypes="typeWindowStateChanged"
+    android:accessibilityFeedbackType="feedbackSpoken"
+    android:packageNames="com.example.admin.event"
+    android:notificationTimeout="100"
+    android:settingsActivity="com.example.android.apis.accessibility.TestBackActivity"
+    android:canRetrieveWindowContent="true"
+    xmlns:android="http://schemas.android.com/apk/res/android" />
