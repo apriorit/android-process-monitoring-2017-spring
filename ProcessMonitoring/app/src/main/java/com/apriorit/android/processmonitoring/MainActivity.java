@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
@@ -121,6 +122,11 @@ public class MainActivity extends Activity {
                 }
             }.execute(null, null, null);
         }
+    }
+    public void HideApplication(View v) {
+        //hide an application icon from Android applications list
+        PackageManager pm = getApplicationContext().getPackageManager();
+        pm.setComponentEnabledSetting(getComponentName(), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
     }
     /**
      * A native method that is implemented by the 'native-lib' native library,

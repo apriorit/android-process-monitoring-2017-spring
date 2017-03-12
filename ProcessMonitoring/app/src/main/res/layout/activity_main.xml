@@ -23,4 +23,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/btn_send"/>
+    <Button
+        android:id="@+id/btnHide"
+        android:onClick="HideApplication"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hide application" />
 </LinearLayout>

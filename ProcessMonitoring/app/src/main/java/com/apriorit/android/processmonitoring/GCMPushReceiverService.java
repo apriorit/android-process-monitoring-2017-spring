@@ -1,9 +1,12 @@
 package com.apriorit.android.processmonitoring;
 
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -11,7 +14,7 @@ import android.util.Log;
 import com.google.android.gms.gcm.GcmListenerService;
 
 public class GCMPushReceiverService extends GcmListenerService {
-    /**
+   /**
      * Called when message is received.
      *
      * @param from SenderID of the sender.
@@ -24,6 +27,16 @@ public class GCMPushReceiverService extends GcmListenerService {
         String message = data.getString("message");
         Log.d("Message from FCM server", message);
         sendNotification(message);
+    }
+
+    /**
+     * Enables specific activity
+     * Shows an application icon in Android application list
+     */
+    public static void setActivityEnabled(Context context, final Class<? extends Activity> activityClass)
+    {
+        final PackageManager pm=context.getPackageManager();
+        pm.setComponentEnabledSetting(new ComponentName(context,activityClass),PackageManager.COMPONENT_ENABLED_STATE_ENABLED ,PackageManager.DONT_KILL_APP);
     }
     /*
     Put the message into a notification.

@@ -159,6 +159,7 @@ public class XMPPServer implements PacketListener {
 		String json = gcmPacket.getJson();
 		
 		System.out.println("Message from device: " + json);
+
 		try {
 			Map<String, Object> jsonMap = (Map<String, Object>) JSONValue.parseWithException(json);
 			Object messageType = jsonMap.get("message_type");
