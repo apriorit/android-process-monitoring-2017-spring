@@ -40,6 +40,5 @@ public class Accessibility extends AccessibilityService{
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 }
