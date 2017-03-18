@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.processmonitoring.bean.CcsOutgoingMessage;
+import com.processmonitoring.util.Util;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -15,8 +19,9 @@ import com.sun.net.httpserver.HttpServer;
  */
 public class ProcessMonitoringHttpServer {
 	 HttpServer server;
-	 public ProcessMonitoringHttpServer() {
-		
+	 private static XMPPServer xmppServer;
+	 public ProcessMonitoringHttpServer(XMPPServer x) {
+		 xmppServer = x;
 	 }
 	 public void create() {
 		 try {
@@ -33,8 +38,10 @@ public class ProcessMonitoringHttpServer {
 	        public void handle(HttpExchange t) throws IOException {
 	        	InputStreamReader isr =  new InputStreamReader(t.getRequestBody(),"utf-8");
 	        	BufferedReader br = new BufferedReader(isr);
-	        	String id = br.readLine();
-	        	System.out.println("Message from desktop client: " + id);
+	        	String requestFromDesktopClient = br.readLine();
+	        	System.out.println("Message from desktop client: " + requestFromDesktopClient);
+	        	
+	        	sendResponseToDevice(requestFromDesktopClient);
 
 	        	String response = "Response from HttpServer";
 	            t.sendResponseHeaders(200, response.length());
@@ -43,4 +50,12 @@ public class ProcessMonitoringHttpServer {
 	            os.close();
 	        }
 	    }
+	 private static void sendResponseToDevice(String request) {
+		  String messageId = Util.getUniqueMessageId();
+	 		Map<String, String> dataPayload = new HashMap<String, String>();
+	 		dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, request);
+	 		CcsOutgoingMessage message = new CcsOutgoingMessage(Util.Device_token, messageId, dataPayload);
+	 		String jsonRequest = MessageHelper.createJsonOutMessage(message);
+	 		xmppServer.send(jsonRequest);
+	}
 }

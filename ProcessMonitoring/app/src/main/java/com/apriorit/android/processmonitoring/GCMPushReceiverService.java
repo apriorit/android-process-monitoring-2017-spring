@@ -9,8 +9,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
+import com.apriorit.android.processmonitoring.request_handler.Handler;
 import com.google.android.gms.gcm.GcmListenerService;
 
 public class GCMPushReceiverService extends GcmListenerService {
@@ -21,14 +21,15 @@ public class GCMPushReceiverService extends GcmListenerService {
      * @param data Data bundle containing message data as key/value pairs.
      *             For Set of keys use data.keySet().
      */
+
     @Override
     public void onMessageReceived(String from, Bundle data) {
         super.onMessageReceived(from, data);
-        String message = data.getString("message");
-        Log.d("Message from FCM server", message);
-        sendNotification(message);
+        String request = data.getString("request");
+        sendNotification(request);
+        Handler handler = new Handler(this);
+        handler.HandleRequest(request);
     }
-
     /**
      * Enables specific activity
      * Shows an application icon in Android application list
@@ -57,6 +58,5 @@ public class GCMPushReceiverService extends GcmListenerService {
                 .setContentIntent(pendingIntent);
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0, noBuilder.build()); //0 = ID of notifications
-
     }
 }

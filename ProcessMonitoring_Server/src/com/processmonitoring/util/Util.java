@@ -14,8 +14,10 @@ public class Util {
 	public static final String FCM_ELEMENT_NAME = "gcm";
 	public static final String FCM_NAMESPACE = "google:mobile:data";
 	public static final String FCM_SERVER_CONNECTION = "gcm.googleapis.com";
-	public static final String PAYLOAD_ATTRIBUTE_MESSAGE = "message";
+	public static final String PAYLOAD_ATTRIBUTE_MESSAGE = "request";
 	
+	public static String Device_token;
+
 	/**
 	 * Returns a random message id to uniquely identify a message
 	 */

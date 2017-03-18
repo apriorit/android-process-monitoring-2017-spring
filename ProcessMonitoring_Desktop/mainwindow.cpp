@@ -20,7 +20,7 @@ void MainWindow::Response(QNetworkReply *reply){
 }
 //Sends message to our App server
 void MainWindow::sendRequest() {
-    QUrl url("http://192.168.0.101:8000");
+    QUrl url("http://127.0.0.1:8000");
     url.port(8000);
 
     QByteArray postData;
