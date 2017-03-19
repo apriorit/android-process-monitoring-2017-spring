@@ -9,7 +9,18 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.apriorit.android.processmonitoring.Lock">
-
+    <EditText
+        android:id="@+id/inputKey"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:background="@color/input_register_bg"
+        android:hint="@string/hint_key"
+        android:inputType="numberPassword"
+        android:padding="10dp"
+        android:singleLine="true"
+        android:textColor="@color/input_register"
+        android:textColorHint="@color/input_register_hint" />
     <Button
         android:text="@string/btn_unlock"
         android:layout_width="wrap_content"
