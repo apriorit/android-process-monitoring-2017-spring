@@ -14,12 +14,21 @@ public class Registration extends AppCompatActivity {
         setContentView(R.layout.activity_registration);
 
         Button btnRegister = (Button) findViewById(R.id.btnRegister);
-
+        Button btnToLogin = (Button) findViewById(R.id.btnLinkToLoginScreen);
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Registration.this, EnterMasterKey.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+        });
+
+        btnToLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Registration.this, Login.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
         });
