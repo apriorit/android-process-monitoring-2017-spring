@@ -71,7 +71,8 @@
 
         <activity android:name=".Lock" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".EnterMasterKey"></activity>
+        <activity android:name=".EnterMasterKey" />
+        <activity android:name=".Login"></activity>
     </application>
 
 </manifest>
