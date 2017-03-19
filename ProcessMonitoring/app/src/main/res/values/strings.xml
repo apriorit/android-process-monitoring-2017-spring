@@ -15,4 +15,5 @@
     <string name="name">Fullname</string>
     <string name="hint_key">Master key</string>
     <string name="hint_key_verify">Master key verify</string>
+    <string name="next_step">Next</string>
 </resources>

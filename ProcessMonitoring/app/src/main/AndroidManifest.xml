@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".Registration"
             android:exported="true"
             android:label="@string/app_name">
             <intent-filter>
@@ -70,7 +70,8 @@
         </service>
 
         <activity android:name=".Lock" />
-        <activity android:name=".Registration"></activity>
+        <activity android:name=".MainActivity" />
+        <activity android:name=".EnterMasterKey"></activity>
     </application>
 
 </manifest>
