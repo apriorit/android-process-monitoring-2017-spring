@@ -5,16 +5,29 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
+import java.util.List;
+
 
 public class Accessibility extends AccessibilityService{
 
     static final String TAG = "RecorderService";
-
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
         Log.d(TAG,"StartEvent");
-        Log.d(TAG, String.format("packageName: %s  className %s eventType %s" , event.getPackageName(), event.getClassName(), event.getEventType()));
-        startLock();
+        List<CharSequence> wordsInWindow = event.getText();
+        Log.d(TAG, String.format("packageName: %s  className %s eventType %s text %s" , event.getPackageName(), event.getClassName(), event.getEventType(),event.getText()));
+       String nameActivity = (String) wordsInWindow.get(0);
+        Log.d(TAG, nameActivity);
+        String eventPackage = String.valueOf(event.getPackageName());
+        Log.d(TAG, eventPackage);
+        if(!eventPackage.equals("com.android.settings")
+                ||nameActivity.equals("Accessibility")
+                ||nameActivity.equals("ProcessMonitoring")
+                )
+        {
+            startLock();
+
+        }
 
     }
 
