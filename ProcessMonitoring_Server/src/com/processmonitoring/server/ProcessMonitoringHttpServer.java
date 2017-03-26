@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.processmonitoring.bean.CcsOutgoingMessage;
+import com.processmonitoring.request_handler.RequestHandler;
 import com.processmonitoring.util.Util;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -19,9 +20,8 @@ import com.sun.net.httpserver.HttpServer;
  */
 public class ProcessMonitoringHttpServer {
 	 HttpServer server;
-	 private static XMPPServer xmppServer;
-	 public ProcessMonitoringHttpServer(XMPPServer x) {
-		 xmppServer = x;
+	 public ProcessMonitoringHttpServer() {
+		 
 	 }
 	 public void create() {
 		 try {
@@ -41,7 +41,7 @@ public class ProcessMonitoringHttpServer {
 	        	String requestFromDesktopClient = br.readLine();
 	        	System.out.println("Message from desktop client: " + requestFromDesktopClient);
 	        	
-	        	sendResponseToDevice(requestFromDesktopClient);
+	        	RequestHandler.sendResponseToDevice("requestListApps", requestFromDesktopClient);
 
 	        	String response = "Response from HttpServer";
 	            t.sendResponseHeaders(200, response.length());
@@ -50,12 +50,4 @@ public class ProcessMonitoringHttpServer {
 	            os.close();
 	        }
 	    }
-	 private static void sendResponseToDevice(String request) {
-		  String messageId = Util.getUniqueMessageId();
-	 		Map<String, String> dataPayload = new HashMap<String, String>();
-	 		dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, request);
-	 		CcsOutgoingMessage message = new CcsOutgoingMessage(Util.Device_token, messageId, dataPayload);
-	 		String jsonRequest = MessageHelper.createJsonOutMessage(message);
-	 		xmppServer.send(jsonRequest);
-	}
 }

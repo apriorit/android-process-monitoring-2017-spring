@@ -9,11 +9,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
-
 import com.apriorit.android.processmonitoring.request_handler.Handler;
 import com.google.android.gms.gcm.GcmListenerService;
 
 public class GCMPushReceiverService extends GcmListenerService {
+    private Intent intentUpdateView;
    /**
      * Called when message is received.
      *
@@ -21,14 +21,34 @@ public class GCMPushReceiverService extends GcmListenerService {
      * @param data Data bundle containing message data as key/value pairs.
      *             For Set of keys use data.keySet().
      */
-
     @Override
     public void onMessageReceived(String from, Bundle data) {
         super.onMessageReceived(from, data);
-        String request = data.getString("request");
-        sendNotification(request);
+        if (data == null) {
+            return;
+        }
+        //sends downstream message to activity
+        intentUpdateView = new Intent("BLACKLIST");
+        sendNotification(data.getString("request"));
         Handler handler = new Handler(this);
-        handler.HandleRequest(request);
+        //Specifies type of downstream message
+        //server can request list or send updated blacklist which will be stored in DB
+        String type = data.getString("type");
+        if(type != null) {
+            switch(type) {
+                case "requestListApps":
+                    //returns list with all apps to server
+                    handler.HandleRequest(data.getString("request"));
+                    break;
+                case "updateBlacklist":
+                    //show list in view
+                    intentUpdateView.putExtra("list", data.getString("request"));
+                    sendBroadcast(intentUpdateView);
+                    //updates database
+                    handler.updateBlacklist(data.getString("request"));
+                    break;
+            }
+        }
     }
     /**
      * Enables specific activity

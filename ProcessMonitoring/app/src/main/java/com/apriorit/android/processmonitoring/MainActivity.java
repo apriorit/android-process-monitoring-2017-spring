@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -20,7 +21,7 @@ public class MainActivity extends Activity {
     private BroadcastReceiver mRegistrationBroadcastReceiver;
     private String mToken;
     private EditText mEditTextToken;
-    private EditText mEditTextMessage;
+    private EditText mEditTextBlacklist;
     private Handler requestHander;
 
     // Used to load the 'native-lib' library on application startup.
@@ -32,10 +33,18 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         mEditTextToken = (EditText)findViewById(R.id.editTextToken);
-        mEditTextMessage = (EditText)findViewById(R.id.editTextMessage);
+        mEditTextBlacklist = (EditText)findViewById(R.id.editTextBlacklist);
 
+        gcmRegistration();
+        requestHander = new Handler(this);
+        registerAccount();
+    }
+    /*
+      Registration device in GCM
+      Obtains new device token
+     */
+    private void gcmRegistration() {
         //This is the handler that will manager to process the broadcast intent
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -68,11 +77,7 @@ public class MainActivity extends Activity {
             Intent intent = new Intent(this, GCMRegistrationIntentService.class);
             startService(intent);
         }
-
-        requestHander = new Handler(this);
-        registerAccount();
     }
-
     /**
      * Sends some registration data to GCM server
      * XMPP server saves in database user data and device token
@@ -91,27 +96,38 @@ public class MainActivity extends Activity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
                 new IntentFilter(GCMRegistrationIntentService.REGISTRATION_ERROR));
+
+        //Registrate receiver which gets list with apps
+        registerReceiver(broadcastReceiver, new IntentFilter("BLACKLIST"));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        unregisterReceiver(broadcastReceiver);
     }
-
     /**
      * Sends message to GCM server
      * GCM server will deliver it to our XMPP server
      */
-    public void SendMessageToServer(final View view) {
-        Bundle data = new Bundle();
-        data.putString("message", mEditTextMessage.getText().toString());
-        requestHander.SendDataToServer(data);
+    public void SendListAppsToServer(final View view) {
+        requestHander.HandleListApps();
     }
     public void HideApplication(View v) {
         //hide an application icon from Android applications list
         PackageManager pm = getApplicationContext().getPackageManager();
         pm.setComponentEnabledSetting(getComponentName(), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+    }
+    //Receives list with app in order to display in activity
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateUI(intent);
+        }
+    };
+    //Displays list in view component
+    private void updateUI(Intent intent) {
+        mEditTextBlacklist.setText(intent.getStringExtra("list"));
     }
     /**
      * A native method that is implemented by the 'native-lib' native library,
@@ -119,3 +135,4 @@ public class MainActivity extends Activity {
      */
     public native String stringFromJNI();
 }
+

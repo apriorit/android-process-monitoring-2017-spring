@@ -1,15 +1,10 @@
 package com.processmonitoring;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jivesoftware.smack.XMPPException;
 
-import com.processmonitoring.bean.CcsOutgoingMessage;
-import com.processmonitoring.server.MessageHelper;
+import com.processmonitoring.request_handler.RequestHandler;
 import com.processmonitoring.server.ProcessMonitoringHttpServer;
 import com.processmonitoring.server.XMPPServer;
-import com.processmonitoring.util.Util;
 
 /**
  * Entry point for application
@@ -29,7 +24,9 @@ public class ProcessMonitoringServer {
 			e.printStackTrace();
 		}
 		
-	    ProcessMonitoringHttpServer httpServer = new ProcessMonitoringHttpServer(xmppServer);
+	    ProcessMonitoringHttpServer httpServer = new ProcessMonitoringHttpServer();
 	    httpServer.create();
+	    
+	    RequestHandler.setServer(xmppServer);
 	}
 }

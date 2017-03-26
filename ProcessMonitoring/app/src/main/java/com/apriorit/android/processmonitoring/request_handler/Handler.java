@@ -8,10 +8,16 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.apriorit.android.processmonitoring.R;
+import com.apriorit.android.processmonitoring.database.AppData;
+import com.apriorit.android.processmonitoring.database.DatabaseHandler;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Handler {
@@ -40,7 +46,7 @@ public class Handler {
     /**
      * Gets list of installed  applications and sends it to GCM server
      */
-    private void HandleListApps() {
+    public void HandleListApps() {
         Bundle data = new Bundle();
         List<ResolveInfo> listApps = getListApps();
         for(int i = 0; i < listApps.size(); i++) {
@@ -63,6 +69,22 @@ public class Handler {
         Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
         return mContext.getPackageManager().queryIntentActivities( mainIntent, 0);
+    }
+    /*
+        Updates SQLite database
+    */
+    public void updateBlacklist(String jsonList) {
+        DatabaseHandler db = new DatabaseHandler(mContext);
+        Log.d("List with apps in json ", jsonList);
+        try {
+            JSONObject jsonObj = new JSONObject(jsonList);
+            Map<String, Object> blackListMap = JsonHelper.toMap(jsonObj);
+            for (Map.Entry<String, Object> entry : blackListMap.entrySet()) {
+                db.addApplicationData(new AppData(entry.getKey(), entry.getValue().toString()));
+            }
+        } catch(JSONException e) {
+
+        }
     }
     /**
      * Sends data to GCM server
