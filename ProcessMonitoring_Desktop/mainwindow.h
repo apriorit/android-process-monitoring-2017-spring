@@ -12,6 +12,7 @@
 #include <QHostAddress>
 #include <QNetworkReply>
 #include <QPushButton>
+#include <QLabel>
 namespace Ui {
 class MainWindow;
 }
@@ -29,6 +30,7 @@ private:
     QPushButton *btnSendRequest;
     //This class allows the application to send network requests and receive replies
     QNetworkAccessManager* manager;
+    QLabel *label;
 private slots:
     void Response(QNetworkReply* reply);
     void sendRequest();

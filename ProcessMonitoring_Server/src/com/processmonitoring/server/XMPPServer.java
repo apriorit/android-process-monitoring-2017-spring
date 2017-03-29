@@ -13,12 +13,15 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smack.provider.PacketExtensionProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
+import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.ParseException;
 import org.xmlpull.v1.XmlPullParser;
 
 import com.processmonitoring.bean.CcsIncomingMessage;
+import com.processmonitoring.request_handler.RequestHandler;
 import com.processmonitoring.util.Util;
+
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -119,6 +122,7 @@ public class XMPPServer implements PacketListener {
 				logger.log(Level.INFO, "Connection closed");
 			}
 		});
+		
 
 		// Handle incoming packets (the class implements the PacketListener)
 		connection.addPacketListener(this, new PacketTypeFilter(Message.class));
@@ -148,6 +152,7 @@ public class XMPPServer implements PacketListener {
 			}
 		}
 	}
+
 	/**
 	 * Handles incoming messages
 	 */
@@ -158,10 +163,27 @@ public class XMPPServer implements PacketListener {
 		GcmPacketExtension gcmPacket = (GcmPacketExtension) incomingMessage.getExtension(Util.FCM_NAMESPACE);
 		String json = gcmPacket.getJson();
 		
-		System.out.println("Message from device: " + json);
-
 		try {
 			Map<String, Object> jsonMap = (Map<String, Object>) JSONValue.parseWithException(json);
+			//get device token which will be saved in database
+			Util.Device_token = jsonMap.get("from").toString();
+			System.out.println("Device_token: " + Util.Device_token);
+	            
+			//retrieve list of installed applications
+			String apps = jsonMap.get("data").toString();
+			Map<String, Object> listApps = (Map<String, Object>) JSONValue.parseWithException(apps);
+			
+			JSONObject jsonBlacklist = new JSONObject();
+			int k = 0;
+			 for (Map.Entry<String, Object> entry : listApps.entrySet()) {
+				    System.out.println("Package: " + entry.getKey() + " Name: " + entry.getValue());
+				    if(k < 50) {
+				    	 jsonBlacklist.put(entry.getKey(), entry.getValue()); 
+				    }
+				    k++;
+			 }	 
+			 //Send back list of apps to android device
+			RequestHandler.sendResponseToDevice("updateBlacklist", jsonBlacklist.toString());
 			Object messageType = jsonMap.get("message_type");
 		 
             if (messageType == null) {
@@ -172,7 +194,7 @@ public class XMPPServer implements PacketListener {
             }
 		} catch (ParseException e) {
 			logger.log(Level.INFO, "Error parsing JSON: " + json, e.getMessage());
-		}
+		} 
 	}
 	/**
      * Handles an upstream message from a device client through FCM

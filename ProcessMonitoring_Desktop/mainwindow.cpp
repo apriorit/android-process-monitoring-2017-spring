@@ -12,15 +12,20 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect the signal to the appropriate slot
     connect(btnSendRequest, SIGNAL (released()), this, SLOT (sendRequest()));
     manager = new QNetworkAccessManager(this);
+
+    label = new QLabel(this);
+    label->setText("");
+    label->setGeometry(QRect(QPoint(10, 100), QSize(350, 30)));
 }
 //Handles response from out App server
 void MainWindow::Response(QNetworkReply *reply){
-     QByteArray data = reply->readAll();
-     qDebug() << "data: " << data;
+    QByteArray data = reply->readAll();
+    qDebug() << "data: " << data;
+    label->setText(data);
 }
 //Sends message to our App server
 void MainWindow::sendRequest() {
-    QUrl url("http://192.168.0.101:8000");
+    QUrl url("http://127.0.0.1:8000"); //192.168.0.101
     url.port(8000);
 
     QByteArray postData;
