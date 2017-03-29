@@ -2,10 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.apriorit.android.processmonitoring">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <permission android:name="com.apriorit.android.processmonitoring.permission.C2D_Message" android:protectionLevel="signature"/>
-    <uses-permission android:name="com.apriorit.android.processmonitoring.permission.C2D_Message"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <permission
+        android:name="com.apriorit.android.processmonitoring.permission.C2D_Message"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.apriorit.android.processmonitoring.permission.C2D_Message" />
 
     <application
         android:allowBackup="true"
@@ -13,31 +17,44 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" android:label="@string/app_name" android:exported="true">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
             android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-                <category android:name="com.apriorit.android.processmonitoring"/>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
+                <category android:name="com.apriorit.android.processmonitoring" />
             </intent-filter>
         </receiver>
-        <service android:name=".GCMPushReceiverService" android:exported="false">
+
+        <service
+            android:name=".GCMPushReceiverService"
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
         </service>
-        <service android:name=".GCMRegistrationIntentService" android:exported="false">
+        <service
+            android:name=".GCMRegistrationIntentService"
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.gms.iid.InstanceID"/>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
+
+        <activity android:name=".device_management.DeviceManagementActivity"></activity>
     </application>
 
 </manifest>
