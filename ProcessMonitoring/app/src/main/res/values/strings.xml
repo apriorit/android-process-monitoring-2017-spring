@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">ProcessMonitoring</string>
+    <string name ="main_name">ProcesMonitor</string>>
     <string name="btn_send">Send</string>
+    <string name="btn_unlock">Unlock</string>>
+    <string name="accessibility_service_label">Accessibility</string>
+    <string name="seting_package">com.android.settings</string>>
 </resources>
