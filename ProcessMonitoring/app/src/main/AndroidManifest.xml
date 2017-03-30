@@ -20,7 +20,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name">
+            android:label="@string/main_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -61,9 +61,7 @@
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/serviceconfig" />
+
         </service>
 
         <activity android:name=".Lock"></activity>
