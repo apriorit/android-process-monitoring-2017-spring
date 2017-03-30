@@ -48,6 +48,7 @@ public class Handler {
      */
     public void HandleListApps() {
         Bundle data = new Bundle();
+        data.putString("requestType", "getAppsList");
         List<ResolveInfo> listApps = getListApps();
         for(int i = 0; i < listApps.size(); i++) {
             data.putString(listApps.get(i).activityInfo.packageName, listApps.get(i).loadLabel(mContext.getPackageManager()).toString());

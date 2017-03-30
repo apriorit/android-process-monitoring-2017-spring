@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Convert Android JSONObject/JSONArray to a standard Map/List
  */
-class JsonHelper {
+public class JsonHelper {
     private static List toList(JSONArray array) throws JSONException {
         List list = new ArrayList();
         for (int i = 0; i < array.length(); i++) {
@@ -32,7 +32,7 @@ class JsonHelper {
             return json;
         }
     }
-     static Map<String, Object> toMap(JSONObject object) throws JSONException {
+   public  static Map<String, Object> toMap(JSONObject object) throws JSONException {
         Map<String, Object> map = new HashMap();
         Iterator keys = object.keys();
         while (keys.hasNext()) {
