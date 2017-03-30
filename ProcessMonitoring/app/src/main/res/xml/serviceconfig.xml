@@ -3,7 +3,6 @@
 <accessibility-service
     android:accessibilityEventTypes="typeWindowStateChanged"
     android:accessibilityFeedbackType="feedbackSpoken"
-    android:packageNames="com.example.admin.event,com.android.settings,com.android.packageinstaller"
     android:notificationTimeout="100"
     android:settingsActivity="com.example.android.apis.accessibility.TestBackActivity"
     android:canRetrieveWindowContent="true"
