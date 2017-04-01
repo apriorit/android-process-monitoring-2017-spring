@@ -14,7 +14,7 @@ public class Util {
 	public static final String FCM_ELEMENT_NAME = "gcm";
 	public static final String FCM_NAMESPACE = "google:mobile:data";
 	public static final String FCM_SERVER_CONNECTION = "gcm.googleapis.com";
-	public static final String PAYLOAD_ATTRIBUTE_MESSAGE = "request";
+	public static final String PAYLOAD_ATTRIBUTE_MESSAGE = "LIST_APPS";
 	
 	public static String Device_token;
 

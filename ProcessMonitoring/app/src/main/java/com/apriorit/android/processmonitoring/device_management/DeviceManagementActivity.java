@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class DeviceManagementActivity extends AppCompatActivity {
     private List<AppDataModel> mListAppDataModel = new ArrayList<>();
-    private ListView listViewApps;
+    private ListView mListViewApps;
     private Handler requestHander;
     private Map<String, Object> mSourceListApps;
     @Override
@@ -44,7 +44,7 @@ public class DeviceManagementActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         //Registrate receiver which gets list with apps
-        registerReceiver(broadcastReceiver, new IntentFilter("BLACKLIST"));
+        registerReceiver(broadcastReceiver, new IntentFilter("LIST_APPS"));
     }
 
     @Override
@@ -85,17 +85,20 @@ public class DeviceManagementActivity extends AppCompatActivity {
         AppsListViewAdapter mListViewAdapter = new AppsListViewAdapter(this, mListAppDataModel);
 
         // Set the list
-        listViewApps = (ListView) findViewById(R.id.listViewApps);
-        listViewApps.setAdapter(mListViewAdapter);
+        mListViewApps = (ListView) findViewById(R.id.listViewApps);
+        mListViewApps.setAdapter(mListViewAdapter);
     }
 
-    public void updateBlacklistOnDevice(View v) {
+    /**
+     * Send list of blocked apps to other device via GCM and App server
+     */
+    public void sendBlacklist(View v) {
         Bundle blockedApps = new Bundle();
-        blockedApps.putString("requestType", "updateBlackList");
+        blockedApps.putString("requestType", "update-blacklist");
         //Adding list of blocked apps to bundle
         int i = 0;
         for (Map.Entry<String, Object> entry : mSourceListApps.entrySet()) {
-            AppDataModel app = (AppDataModel) listViewApps.getItemAtPosition(i);
+            AppDataModel app = (AppDataModel) mListViewApps.getItemAtPosition(i);
             if(app.getAccess()) {
                 blockedApps.putString(entry.getKey(), entry.getValue().toString());
             }

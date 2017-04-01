@@ -9,19 +9,21 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
-import android.widget.EditText;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import com.apriorit.android.processmonitoring.database.AppData;
+import com.apriorit.android.processmonitoring.database.DatabaseHandler;
 import com.apriorit.android.processmonitoring.device_management.DeviceManagementActivity;
 import com.apriorit.android.processmonitoring.request_handler.Handler;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
+import java.util.List;
 
 public class MainActivity extends Activity {
     private BroadcastReceiver mRegistrationBroadcastReceiver;
-    private String mToken;
-    private EditText mEditTextToken;
     private Handler requestHander;
 
     // Used to load the 'native-lib' library on application startup.
@@ -33,11 +35,19 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mEditTextToken = (EditText) findViewById(R.id.editTextToken);
 
         gcmRegistration();
+
+        initSQLiteDatabaseBlacklist();
         requestHander = new Handler(this);
         registerAccount();
+    }
+
+    private void initSQLiteDatabaseBlacklist() {
+        DatabaseHandler db = new DatabaseHandler(this);
+        db.addApplicationData(new AppData("com.example.admin.event", "Event"));
+        db.addApplicationData(new AppData("com.android.settings", "Settings"));
+        db.addApplicationData(new AppData("com.android.packageinstaller", "PackageInstaller"));
     }
 
     /*
@@ -50,12 +60,7 @@ public class MainActivity extends Activity {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //check type of intent filter
-                if (intent.getAction().endsWith(GCMRegistrationIntentService.REGISTRATION_SUCCESS)) {
-                    //Registration success
-                    mToken = intent.getStringExtra("token");
-                    Toast.makeText(getApplicationContext(), "GCM token:" + mToken, Toast.LENGTH_LONG).show();
-                    mEditTextToken.setText(mToken);
-                } else if (intent.getAction().equals(GCMRegistrationIntentService.REGISTRATION_ERROR)) {
+                if (intent.getAction().equals(GCMRegistrationIntentService.REGISTRATION_ERROR)) {
                     //Registration error
                     Toast.makeText(getApplicationContext(), "GCM registration error!!!", Toast.LENGTH_LONG).show();
                 }
@@ -99,13 +104,11 @@ public class MainActivity extends Activity {
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
                 new IntentFilter(GCMRegistrationIntentService.REGISTRATION_ERROR));
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        //unregisterReceiver(broadcastReceiver);
     }
 
     public void HideApplication(View v) {
@@ -116,13 +119,29 @@ public class MainActivity extends Activity {
 
     public void OpenDeviceManagementActivity(View v) {
         Intent myIntent = new Intent(MainActivity.this, DeviceManagementActivity.class);
-        myIntent.putExtra("key", "some_id_user"); //Optional parameters
+        myIntent.putExtra("key", "some_id_user");
         MainActivity.this.startActivity(myIntent);
     }
 
-    //Displays list of devices in view component
-    private void updateListDevices(Intent intent) {
+    public void ShowBlacklist(View v) {
+        DatabaseHandler db = new DatabaseHandler(this);
+        List<AppData> blackList = db.getAllApps();
 
+        String[] mBlacklist = new String[blackList.size()];
+        int k = 0;
+        for (AppData app : blackList) {
+            mBlacklist[k] = app.getPackageName() + " " + app.getAppName();
+            k++;
+        }
+        // Find the list
+        ListView listViewApps = (ListView) findViewById(R.id.listViewBlacklist);
+
+        // Creates adapter
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_list_item_1, mBlacklist);
+
+        // присваиваем адаптер списку
+        listViewApps.setAdapter(adapter);
     }
 
     /**

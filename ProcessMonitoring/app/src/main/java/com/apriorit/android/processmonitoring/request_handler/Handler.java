@@ -28,27 +28,11 @@ public class Handler {
     }
 
     /**
-     * Uses Chain of Responsibility pattern to choose handler for current request
-     */
-    public void HandleRequest(String request) {
-        switch(request) {
-            case "list-apps":
-                HandleListApps();
-                break;
-            case "location":
-                HandleDeviceLocation();
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
      * Gets list of installed  applications and sends it to GCM server
      */
     public void HandleListApps() {
         Bundle data = new Bundle();
-        data.putString("requestType", "getAppsList");
+        data.putString("requestType", "get-list-apps");
         List<ResolveInfo> listApps = getListApps();
         for(int i = 0; i < listApps.size(); i++) {
             data.putString(listApps.get(i).activityInfo.packageName, listApps.get(i).loadLabel(mContext.getPackageManager()).toString());
@@ -59,7 +43,7 @@ public class Handler {
     /**
      * Gets coordinates and sends it to GCM server
      */
-    private void HandleDeviceLocation() {
+    public void HandleDeviceLocation() {
 
     }
 
@@ -72,19 +56,20 @@ public class Handler {
         return mContext.getPackageManager().queryIntentActivities( mainIntent, 0);
     }
     /*
-        Updates SQLite database
+        Updates SQLite database which stores blacklist
     */
-    public void updateBlacklist(String jsonList) {
+    public void updateBlacklistInDB(String jsonUpdatedBlacklist) {
         DatabaseHandler db = new DatabaseHandler(mContext);
-        Log.d("List with apps in json ", jsonList);
         try {
-            JSONObject jsonObj = new JSONObject(jsonList);
-            Map<String, Object> blackListMap = JsonHelper.toMap(jsonObj);
-            for (Map.Entry<String, Object> entry : blackListMap.entrySet()) {
+            //parse json string
+            JSONObject jsonObj = new JSONObject(jsonUpdatedBlacklist);
+            Map<String, Object> blackList = JsonHelper.toMap(jsonObj);
+
+            for (Map.Entry<String, Object> entry : blackList.entrySet()) {
                 db.addApplicationData(new AppData(entry.getKey(), entry.getValue().toString()));
             }
-        } catch(JSONException e) {
-
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
     /**

@@ -9,12 +9,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+
 import com.apriorit.android.processmonitoring.request_handler.Handler;
 import com.google.android.gms.gcm.GcmListenerService;
 
 public class GCMPushReceiverService extends GcmListenerService {
-    private Intent intentUpdateView;
-   /**
+    /**
      * Called when message is received.
      *
      * @param from SenderID of the sender.
@@ -24,41 +24,52 @@ public class GCMPushReceiverService extends GcmListenerService {
     @Override
     public void onMessageReceived(String from, Bundle data) {
         super.onMessageReceived(from, data);
-        if (data == null) {
-            return;
-        }
-        //sends downstream message to activity
-        intentUpdateView = new Intent("BLACKLIST");
-        sendNotification(data.getString("request"));
+        Intent intentUpdateList;
+        if (data != null)
+            sendNotification(data.getString("LIST_APPS"));
+
         Handler handler = new Handler(this);
-        //Specifies type of downstream message
-        //server can request list or send updated blacklist which will be stored in DB
-        String type = data.getString("type");
-        if(type != null) {
-            switch(type) {
-                case "requestListApps":
-                    //returns list with all apps to server
-                    handler.HandleRequest(data.getString("request"));
-                    break;
-                case "updateBlacklist":
-                    //show list in view
-                    intentUpdateView.putExtra("list", data.getString("request"));
-                    sendBroadcast(intentUpdateView);
-                    //updates database
-                    handler.updateBlacklist(data.getString("request"));
-                    break;
+        try {
+            String type = data.getString("requestType");
+            if (type != null) {
+                switch (type) {
+                    case "list-apps":
+                        //sends downstream message to activity
+                        intentUpdateList = new Intent("LIST_APPS");
+                        intentUpdateList.putExtra("list", data.getString("LIST_APPS"));
+                        sendBroadcast(intentUpdateList);
+                        break;
+                    case "get-list-apps":
+                        handler.HandleListApps();
+                        break;
+                    case "location":
+                        handler.HandleDeviceLocation();
+                        break;
+                    case "update-blacklist":
+                        //update dababase
+                        handler.updateBlacklistInDB(data.getString("LIST_APPS"));
+                        intentUpdateList = new Intent("UPDATE_BLACKLIST");
+                        //notificate accessibility service to update blacklist
+                        sendBroadcast(intentUpdateList);
+                        break;
+                    default:
+                        break;
+                }
             }
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
     }
+
     /**
      * Enables specific activity
      * Shows an application icon in Android application list
      */
-    public static void setActivityEnabled(Context context, final Class<? extends Activity> activityClass)
-    {
-        final PackageManager pm=context.getPackageManager();
-        pm.setComponentEnabledSetting(new ComponentName(context,activityClass),PackageManager.COMPONENT_ENABLED_STATE_ENABLED ,PackageManager.DONT_KILL_APP);
+    public static void setActivityEnabled(Context context, final Class<? extends Activity> activityClass) {
+        final PackageManager pm = context.getPackageManager();
+        pm.setComponentEnabledSetting(new ComponentName(context, activityClass), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
     }
+
     /*
     Put the message into a notification.
     This code is used for testing GCM server
@@ -76,7 +87,7 @@ public class GCMPushReceiverService extends GcmListenerService {
                 .setContentText(message)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent);
-        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0, noBuilder.build()); //0 = ID of notifications
     }
 }
