@@ -1,6 +1,7 @@
 package com.apriorit.android.processmonitoring;
 
 import android.app.Activity;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -15,6 +17,7 @@ import android.widget.Toast;
 
 import com.apriorit.android.processmonitoring.database.AppData;
 import com.apriorit.android.processmonitoring.database.DatabaseHandler;
+import com.apriorit.android.processmonitoring.device_administrator.PolicyManager;
 import com.apriorit.android.processmonitoring.device_management.DeviceManagementActivity;
 import com.apriorit.android.processmonitoring.request_handler.Handler;
 import com.google.android.gms.common.ConnectionResult;
@@ -22,9 +25,10 @@ import com.google.android.gms.common.GoogleApiAvailability;
 
 import java.util.List;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements View.OnClickListener {
     private BroadcastReceiver mRegistrationBroadcastReceiver;
     private Handler requestHander;
+    private PolicyManager mPolicyManager;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -41,6 +45,8 @@ public class MainActivity extends Activity {
         initSQLiteDatabaseBlacklist();
         requestHander = new Handler(this);
         registerAccount();
+
+        mPolicyManager = new PolicyManager(this);
     }
 
     private void initSQLiteDatabaseBlacklist() {
@@ -142,6 +148,48 @@ public class MainActivity extends Activity {
 
         // присваиваем адаптер списку
         listViewApps.setAdapter(adapter);
+    }
+
+    //Handles click on buttons Activate and deactivate admin
+    @Override
+    public void onClick(View v) {
+        // TODO Auto-generated method stub
+        switch (v.getId()) {
+            case R.id.activate_admin:
+                //Activates Device administrator
+                if (!mPolicyManager.isAdminActive()) {
+                    Intent activateDeviceAdmin = new Intent(
+                            DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+
+                    activateDeviceAdmin.putExtra(
+                            DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+                            mPolicyManager.getAdminComponent());
+                    activateDeviceAdmin
+                            .putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                                    "After activating admin, you will be able to block application uninstallation.");
+                    startActivityForResult(activateDeviceAdmin,
+                            PolicyManager.DPM_ACTIVATION_REQUEST_CODE);
+                }
+                break;
+            case R.id.deactivate_admin:
+                //disabling device admin
+                if (mPolicyManager.isAdminActive()) {
+                    mPolicyManager.disableAdmin();
+                }
+                break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK
+                && requestCode == PolicyManager.DPM_ACTIVATION_REQUEST_CODE) {
+            // handle code for successfull enable of admin
+            Log.d("Device administrator", "successfull enable of admin");
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+
     }
 
     /**

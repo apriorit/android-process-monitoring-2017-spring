@@ -33,12 +33,17 @@ public class RequestHandler {
 					JSONObject jsonListApps = new JSONObject();
 					int k = 0;
 					 for (Map.Entry<String, Object> entry : listData.entrySet()) {
-						    //System.out.println("Package: " + entry.getKey() + " Name: " + entry.getValue());
-						    if(k < 50) {
-						    	 if(!entry.getKey().equals("requestType")) 	
-						    		 jsonListApps.put(entry.getKey(), entry.getValue()); 
+						 if(!entry.getKey().equals("requestType")) {
+							 if(k < 10) {
+					    		 jsonListApps.put(entry.getKey(), entry.getValue()); 
+						    } else {
+						    	jsonListApps.put(entry.getKey(), entry.getValue()); 
+						    	RequestHandler.sendResponseToDevice("list-apps", jsonListApps.toString());
+						    	jsonListApps.clear();
+						    	k = 0;
 						    }
 						    k++;
+						 }  
 					 }	
 					 //Send back list of apps to android device
 					RequestHandler.sendResponseToDevice("list-apps", jsonListApps.toString());
