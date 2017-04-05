@@ -1,7 +1,6 @@
 package com.apriorit.android.processmonitoring.device_management;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -55,8 +54,9 @@ class AppsListViewAdapter extends BaseAdapter {
         final Switch switchAppAccess = (Switch) view.findViewById(R.id.switchAccess);
 
         //Get the data model for this position
-        AppDataModel p = getAppModel(position);
-        nameApp.setText(p.getAppName());
+        // AppDataModel p = getAppModel(position);
+        nameApp.setText(mListAppsDataModel.get(position).getAppName());
+        switchAppAccess.setChecked(mListAppsDataModel.get(position).getAccess());
 
         //Handles click on switch
         switchAppAccess.setOnClickListener(new View.OnClickListener() {
@@ -72,10 +72,6 @@ class AppsListViewAdapter extends BaseAdapter {
         return view;
     }
 
-    private AppDataModel getAppModel(int position) {
-        return ((AppDataModel) getItem(position));
-    }
-
     /**
      * Adds or deletes application from Blacklist
      */
@@ -84,7 +80,7 @@ class AppsListViewAdapter extends BaseAdapter {
     }
 
     /**
-     *  Correct displaying items while scrolling
+     * Correct displaying items while scrolling
      */
     @Override
     public int getViewTypeCount() {

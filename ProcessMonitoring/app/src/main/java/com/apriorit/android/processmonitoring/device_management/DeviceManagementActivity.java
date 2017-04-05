@@ -22,21 +22,19 @@ import java.util.Map;
 
 public class DeviceManagementActivity extends AppCompatActivity {
     private List<AppDataModel> mListAppDataModel;
+
     private ListView mListViewApps;
     private Handler requestHander;
-    private Map<String, Object> mSourceListApps;
-    AppsListViewAdapter mListViewAdapter;
+    private AppsListViewAdapter mListViewAdapter;
 
-    boolean initListView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_management);
 
         mListAppDataModel = new ArrayList<>();
+        mListViewApps = (ListView) findViewById(R.id.listViewApps);
 
-        initListView = false;
-        mListViewAdapter = null;
         requestHander = new Handler(this);
 
         Intent intent = getIntent();
@@ -77,32 +75,21 @@ public class DeviceManagementActivity extends AppCompatActivity {
     }
 
     private void updateListView(Intent intent) {
+        mListViewAdapter = null;
         try {
             //parse json string
             JSONObject jsonObj = new JSONObject(intent.getStringExtra("list"));
-            mSourceListApps = JsonHelper.toMap(jsonObj);
+            Map<String, Object> mSourceListApps = JsonHelper.toMap(jsonObj);
             for (Map.Entry<String, Object> entry : mSourceListApps.entrySet()) {
-                if (mListViewAdapter == null) {
-                    mListAppDataModel.add(new AppDataModel(entry.getValue().toString(), false));
-                } else {
-                    mListAppDataModel.add(new AppDataModel(entry.getValue().toString(), false));
-                }
+                mListAppDataModel.add(new AppDataModel(entry.getKey(), entry.getValue().toString(), false));
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        if(!initListView) {
-            //Set adapter and show list
-            mListViewAdapter = new AppsListViewAdapter(this, mListAppDataModel);
+        //Set adapter and show list
+        mListViewAdapter = new AppsListViewAdapter(this, mListAppDataModel);
 
-            // Set the list
-            mListViewApps = (ListView) findViewById(R.id.listViewApps);
-            mListViewApps.setAdapter(mListViewAdapter);
-
-            initListView = true;
-        } else {
-            mListViewAdapter.notifyDataSetChanged();
-        }
+        mListViewApps.setAdapter(mListViewAdapter);
     }
 
     /**
@@ -112,16 +99,14 @@ public class DeviceManagementActivity extends AppCompatActivity {
         Bundle blockedApps = new Bundle();
         blockedApps.putString("requestType", "update-blacklist");
         //Adding list of blocked apps to bundle
-        int i = 0;
-        for (Map.Entry<String, Object> entry : mSourceListApps.entrySet()) {
-            AppDataModel app = (AppDataModel) mListViewApps.getItemAtPosition(i);
+        for (int i = 0; i < mListViewAdapter.getCount(); i++) {
+            AppDataModel app = (AppDataModel) mListViewAdapter.getItem(i);
             if (app.getAccess()) {
-                blockedApps.putString(entry.getKey(), entry.getValue().toString());
+                blockedApps.putString(app.getPackageName(), app.getAppName());
             }
-            i++;
         }
         //Send list of blocked apps to server
-        if (i != 0)
+        if (blockedApps.size() != 0)
             requestHander.SendDataToServer(blockedApps);
     }
 }
