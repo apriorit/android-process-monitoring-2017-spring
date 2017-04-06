@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+#include "QTextCodec"
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -17,11 +17,12 @@ MainWindow::MainWindow(QWidget *parent) :
     label->setText("");
     label->setGeometry(QRect(QPoint(10, 100), QSize(350, 30)));
 }
-//Handles response from out App server
+//Handles response from our App server
 void MainWindow::Response(QNetworkReply *reply){
     QByteArray data = reply->readAll();
-    qDebug() << "data: " << data;
-    label->setText(data);
+    QString response = QString::fromUtf8(data);
+    qDebug() << response;
+    label->setText(response);
 }
 //Sends message to our App server
 void MainWindow::sendRequest() {
