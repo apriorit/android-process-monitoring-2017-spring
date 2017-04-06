@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "QTextCodec"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -16,6 +16,25 @@ MainWindow::MainWindow(QWidget *parent) :
     label = new QLabel(this);
     label->setText("");
     label->setGeometry(QRect(QPoint(10, 100), QSize(350, 30)));
+
+    //placing map in main window
+    view = new QQuickView();
+    QWidget *container = QWidget::createWindowContainer(view, this);
+    //set properties of container with map
+    container->setGeometry(QRect(QPoint(300, 20), QSize(540, 500)));
+    container->setFocusPolicy(Qt::TabFocus);
+
+     QUrl q(QStringLiteral("QML:///map.qml"));
+    view->setSource(QUrl(QStringLiteral("qrc:///map.qml")));
+    item = view->rootObject();
+
+    //set coordinates specifying the center of the viewport
+    item->setProperty("latitude", 48.4656371);
+    item->setProperty("longitude",  35.04900455);
+
+    //coordinates of the marker on this map
+    item->setProperty("device_latitude", 48.48508294);
+    item->setProperty("device_longitude", 35.08914748);
 }
 //Handles response from our App server
 void MainWindow::Response(QNetworkReply *reply){
@@ -38,6 +57,10 @@ void MainWindow::sendRequest() {
     QObject::connect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(Response(QNetworkReply *)));
 
     manager->post(qNetworkRequest, postData);
+
+    //change location of marker
+    item->setProperty("device_latitude", 48.46963499);
+    item->setProperty("device_longitude", 35.03785193);
 }
 MainWindow::~MainWindow()
 {

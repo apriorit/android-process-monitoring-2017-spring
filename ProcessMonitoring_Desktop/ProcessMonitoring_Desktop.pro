@@ -6,6 +6,8 @@
 
 QT       += core gui
 QT       += network
+QT += quick qml positioning location
+
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = ProcessMonitoring_Desktop
@@ -29,3 +31,9 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h
 
 FORMS    += mainwindow.ui
+
+RESOURCES += \
+    map.qrc
+
+DISTFILES += \
+    map.qml

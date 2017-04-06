@@ -13,6 +13,8 @@
 #include <QNetworkReply>
 #include <QPushButton>
 #include <QLabel>
+#include <QQuickView>
+#include<QQuickItem>
 namespace Ui {
 class MainWindow;
 }
@@ -31,6 +33,8 @@ private:
     //This class allows the application to send network requests and receive replies
     QNetworkAccessManager* manager;
     QLabel *label;
+    QQuickView *view;
+    QQuickItem *item;
 private slots:
     void Response(QNetworkReply* reply);
     void sendRequest();
