@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <permission
         android:name="com.apriorit.android.processmonitoring.permission.C2D_Message"
         android:protectionLevel="signature" />
@@ -54,7 +55,9 @@
                 <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
-        <activity android:name=".device_management.DeviceManagementActivity"></activity>
+
+        <activity android:name=".device_management.DeviceManagementActivity" />
+
         <service
             android:name=".Accessibility"
             android:enabled="true"
@@ -67,13 +70,13 @@
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/serviceconfig" />
-
         </service>
 
         <activity android:name=".Lock" />
         <activity android:name=".MainActivity" />
         <activity android:name=".EnterMasterKey" />
-        <activity android:name=".Login"></activity>
+        <activity android:name=".Login" />
+        <activity android:name=".Select_user"></activity>
     </application>
 
 </manifest>

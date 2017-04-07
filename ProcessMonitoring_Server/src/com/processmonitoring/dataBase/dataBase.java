@@ -1,3 +1,5 @@
+package com.processmonitoring.dataBase;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -9,10 +11,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 public class dataBase {
-	private static final String url = "jdbc:mysql://localhost:3306/android_registration";
+	private static String tz = TimeZone.getDefault().getID();
+	private static final String url = "jdbc:mysql://localhost:3306/android_registration?useLegacyDetetimeCode=false&serverTimezone="+ tz;
     private static final String user = "root";
-    private static final String password = "root";
+    private static final String password = "78bilufi";
     
     private static Connection con;
     private static Statement stmt;
@@ -38,18 +42,20 @@ public class dataBase {
              
          }
     }
-    public void printUsersFrom(String account){
+    public HashSet<String> getUsers(String account){
+    		HashSet<String> users = new HashSet<String>();
          	String query = "select user_name from users where account_login ="+"'"+account+"'";
          	try {
 				dataBase.rs = dataBase.stmt.executeQuery(query);
 	             while (dataBase.rs.next()) {
 	                String name = rs.getString(1);
+	                users.add(name);
 	              }
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-             
+            return users;
     }
     
     public int getUserId(String account, String userName){

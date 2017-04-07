@@ -14,6 +14,7 @@ import com.google.android.gms.gcm.GcmListenerService;
 
 public class GCMPushReceiverService extends GcmListenerService {
     private Intent intentUpdateView;
+    private Intent intentUsers;
    /**
      * Called when message is received.
      *
@@ -29,6 +30,7 @@ public class GCMPushReceiverService extends GcmListenerService {
         }
         //sends downstream message to activity
         intentUpdateView = new Intent("BLACKLIST");
+        intentUsers = new Intent("USERS");
         sendNotification(data.getString("request"));
         Handler handler = new Handler(this);
         //Specifies type of downstream message
@@ -46,6 +48,10 @@ public class GCMPushReceiverService extends GcmListenerService {
                     sendBroadcast(intentUpdateView);
                     //updates database
                     handler.updateBlacklist(data.getString("request"));
+                    break;
+                case "returnUsers":
+                    intentUsers.putExtra("list", data.getString("request"));
+                    sendBroadcast(intentUsers);
                     break;
             }
         }
