@@ -18,9 +18,15 @@
         android:layout_height="wrap_content"
         android:ems="10" />
     <Button
-        android:id="@+id/btnSend"
-        android:onClick="SendMessageToServer"
-        android:layout_width="match_parent"
+        android:id="@+id/btnHide"
+        android:onClick="HideApplication"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/btn_send"/>
+        android:text="Hide application" />
+    <Button
+        android:id="@+id/OpenDeviceManagementActivity"
+        android:onClick="OpenDeviceManagementActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="OpenDeviceManagementActivity" />
 </LinearLayout>

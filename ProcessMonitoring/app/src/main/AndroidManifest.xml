@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
+  
     <permission
         android:name="com.apriorit.android.processmonitoring.permission.C2D_Message"
         android:protectionLevel="signature" />
@@ -53,6 +53,7 @@
                 <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
+        <activity android:name=".device_management.DeviceManagementActivity"></activity>
         <service
             android:name=".Accessibility"
             android:enabled="true"
