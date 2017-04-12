@@ -37,10 +37,15 @@ public class Select_user extends AppCompatActivity {
     private Handler requestHander;
     private BroadcastReceiver broadcastReceiver;
     private static SharedPreferences accountName;
+    private static SharedPreferences tokenId;
 
     public static final String APP_PREFERENCES = "preference";
     public static final String APP_PREFERENCES_ACCOUNT_NAME = "accountName";
+    public static final String APP_PREFERENCES_TOKEN_ID = "tokenId";
+
+    public static  String tokenIdString;
     private static String accountNameText;
+
     private static HashSet<String> accountUsers = new HashSet<String>();
     private static TextView massage;
 
@@ -58,8 +63,9 @@ public class Select_user extends AppCompatActivity {
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // get account Name
+        // get account Name, tokenId preferense
         accountName = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
+        tokenId = getSharedPreferences(APP_PREFERENCES_TOKEN_ID,Context.MODE_PRIVATE);
 
         super.onCreate(savedInstanceState);
         setContentView(activity_select_user);
@@ -128,7 +134,10 @@ public class Select_user extends AppCompatActivity {
                     massage.setVisibility(View.VISIBLE);
                 }
                 else{
-                    setToken("","");
+                    accountNameText = accountName.getString(APP_PREFERENCES_ACCOUNT_NAME,"");
+                    createUser(accountNameText,userName);
+                    tokenIdString = tokenId.getString(APP_PREFERENCES_TOKEN_ID, "");
+                    setToken(accountNameText,userName,tokenIdString);
                 }
 
             }
@@ -161,7 +170,9 @@ public class Select_user extends AppCompatActivity {
                 btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        setToken((String) entry.getValue(),"1");
+                        accountNameText = accountName.getString(APP_PREFERENCES_ACCOUNT_NAME,"");
+                        tokenIdString = tokenId.getString(APP_PREFERENCES_TOKEN_ID, "");
+                        setToken(accountNameText,(String) entry.getValue(),tokenIdString);
                     }
                 });
                 llt.addView(btn);
@@ -171,11 +182,19 @@ public class Select_user extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-    private void setToken(String userName,String tokenId){
+    private void setToken(String accountName,String userName,String tokenId){
         Bundle registrationData = new Bundle();
         registrationData.putString("requestType", "setToken");
+        registrationData.putString("accountName", accountName);
         registrationData.putString("userName", userName);
         registrationData.putString("tokenId", tokenId);
+        requestHander.SendDataToServer(registrationData);
+    }
+    private void createUser(String accountName,String userName){
+        Bundle registrationData = new Bundle();
+        registrationData.putString("requestType", "createUser");
+        registrationData.putString("accountName", accountName);
+        registrationData.putString("userName", userName);
         requestHander.SendDataToServer(registrationData);
     }
 }

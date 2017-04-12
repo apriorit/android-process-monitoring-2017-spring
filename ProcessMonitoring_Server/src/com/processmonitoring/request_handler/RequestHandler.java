@@ -30,6 +30,27 @@ public class RequestHandler {
 			Map<String, Object> listData = (Map<String, Object>) JSONValue.parseWithException(data);
 			String type = (String) listData.get("requestType");
 			switch(type) {
+				case "setToken":
+					String accName = (String) listData.get("accountName");
+					String user = (String) listData.get("userName");
+					String tokenId = (String) listData.get("tokenId");
+					
+					System.out.println("LOGIN: " + accName);
+					System.out.println("USER: " + user);
+					System.out.println("Token: " + tokenId);
+					int userId = dBase.getUserId(accName, user);
+					dBase.connectDevice(userId, tokenId);
+					
+				break;
+				case "createUser":
+					String accountN = (String) listData.get("accountName");
+					String userN = (String) listData.get("userName");
+					System.out.println("LOGIN: " + listData.get("accountName"));
+					System.out.println("USER: " + listData.get("userName"));
+					
+					dBase.createUser(accountN, userN);
+					
+				break;
 				case "getUsers":
 					String accountName = (String) listData.get("accName");
 					HashSet<String> users = dBase.getUsers(accountName);

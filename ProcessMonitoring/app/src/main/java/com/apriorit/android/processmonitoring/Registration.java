@@ -3,9 +3,12 @@ package com.apriorit.android.processmonitoring;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,26 +23,31 @@ public class Registration extends AppCompatActivity {
 
     private BroadcastReceiver mRegistrationBroadcastReceiver;
     private String mToken;
-    private EditText mEditTextToken;
     private Handler requestHander;
     public static final String APP_PREFERENCES = "preference";
     public static final String APP_PREFERENCES_KEY = "masterKey";
     public static final String APP_PREFERENCES_ACCOUNT_NAME = "accountName";
+    public static final String APP_PREFERENCES_TOKEN_ID = "tokenId";
     public static final int MIN_KEY_LENGHT = 4;
     public static final int MIN_LOGIN_LENGHT = 6;
     public static final int MIN_PASS_LENGHT = 8;
     SharedPreferences masterKey;
     SharedPreferences accountName;
+    SharedPreferences tokenId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestHander = new Handler(this);
-        //save master key in phone memory
+        //initialize variable for save master key,accoun name, tokenId in phone memory
         masterKey = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
         accountName = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
-
+        tokenId = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
         setContentView(R.layout.activity_registration);
+
+
+        //gcmRegistration();
+
         final TextView key = (TextView) findViewById(R.id.master_key);
         final TextView keyVetify = (TextView) findViewById(R.id.master_key_verify);
         final TextView login = (TextView) findViewById(R.id.login);
@@ -67,7 +75,6 @@ public class Registration extends AppCompatActivity {
                     SharedPreferences.Editor accName = accountName.edit();
                     accName.putString(APP_PREFERENCES_ACCOUNT_NAME, loginText);
                     accName.commit();
-
                     gcmRegistration();
 //                    registerAccount( loginText, passText,keyText);
                     Intent intent = new Intent(Registration.this, Select_user.class);
@@ -90,7 +97,11 @@ public class Registration extends AppCompatActivity {
         });
 
     }
+
+
     protected void gcmRegistration() {
+
+        Log.d("MY", "gcaRegistration work");
         //This is the handler that will manager to process the broadcast intent
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -100,7 +111,12 @@ public class Registration extends AppCompatActivity {
                     //Registration success
                     mToken = intent.getStringExtra("token");
                     Toast.makeText(getApplicationContext(), "GCM token:" + mToken, Toast.LENGTH_LONG).show();
-                    mEditTextToken.setText(mToken);
+                    Log.d("MY", mToken);
+
+//                    SharedPreferences.Editor tId = tokenId.edit();
+//                    tId.putString(APP_PREFERENCES_TOKEN_ID, mToken);
+//                    tId.commit();
+
                 } else if (intent.getAction().equals(GCMRegistrationIntentService.REGISTRATION_ERROR)) {
                     //Registration error
                     Toast.makeText(getApplicationContext(), "GCM registration error!!!", Toast.LENGTH_LONG).show();
