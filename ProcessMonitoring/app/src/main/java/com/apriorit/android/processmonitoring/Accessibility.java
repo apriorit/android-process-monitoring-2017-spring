@@ -22,15 +22,6 @@ public class Accessibility extends AccessibilityService{
         }
         return resolveInfos.get(0).activityInfo.packageName;
     }
-//    private String queryInstallerPkgName(){
-//
-//        Intent intent = new Intent(PackageInstaller.ACTION_SESSION_DETAILS);
-//        List<ResolveInfo> resolveInfos = getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-//        if(resolveInfos == null || resolveInfos.size() == 0){
-//            return "";
-//        }
-//        return resolveInfos.get(0).activityInfo.packageName;
-//    }
     static final String TAG = "RecorderService";
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
@@ -39,16 +30,21 @@ public class Accessibility extends AccessibilityService{
         Log.d(TAG,accessibility_service_label);
         List<CharSequence> wordsInWindow = event.getText();
         Log.d(TAG, String.format("packageName: %s  className %s eventType %s text %s" , event.getPackageName(), event.getClassName(), event.getEventType(),event.getText()));
-       String nameActivity = (String) wordsInWindow.get(0);
+        String nameActivity = (String) wordsInWindow.get(0);
         Log.d(TAG, nameActivity);
         String eventPackage = String.valueOf(event.getPackageName());
         Log.d(TAG, eventPackage);
-        if(!eventPackage.equals("com.android.settings")
-                ||nameActivity.equals(accessibility_service_label)
-                ||nameActivity.equals(app_name)
-                )
+        if(eventPackage.equals(querySettingPkgName()) || eventPackage.equals("com.android.packageinstaller"))
         {
-            startLock();
+            if(nameActivity.equals(accessibility_service_label)){
+                startLock();
+            }
+            else if(nameActivity.equals(app_name)){
+                startLock();
+            }
+            else{
+
+            }
         }
 
     }
