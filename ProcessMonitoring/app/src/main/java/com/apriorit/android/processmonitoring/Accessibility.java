@@ -6,7 +6,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.provider.Settings;
@@ -19,6 +18,7 @@ import android.view.accessibility.AccessibilityEvent;
 import com.apriorit.android.processmonitoring.database.AppData;
 import com.apriorit.android.processmonitoring.database.DatabaseHandler;
 
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -32,7 +32,7 @@ public class Accessibility extends AccessibilityService{
         return resolveInfos.get(0).activityInfo.packageName;
     }
 
-
+    private AccessibilityServiceInfo info;
     static final String TAG = "RecorderService";
 
     @Override
@@ -44,24 +44,34 @@ public class Accessibility extends AccessibilityService{
 
         Log.d(TAG, String.format("packageName: %s  className %s eventType %s text %s" , event.getPackageName(), event.getClassName(), event.getEventType(),event.getText()));
 
-        String nameActivity = (String) wordsInWindow.get(0);
-        Log.d(TAG, nameActivity);
+        //name apps in settings
+        Boolean flagIsLock = false;
+        Iterator<CharSequence> iter = wordsInWindow.iterator();
+        while (iter.hasNext()){
+            String word = (String) iter.next();
+            Log.d(TAG, word);
+            if(word.equals(app_name) || word.equals(accessibility_service_label)){
+                flagIsLock = true;
+
+            }
+        }
+       // String nameActivity = (String) wordsInWindow.get(0);
+        //Log.d(TAG, nameActivity);
         String eventPackage = String.valueOf(event.getPackageName());
         Log.d(TAG, eventPackage);
-<<<<<<< HEAD
         if(eventPackage.equals(querySettingPkgName()) || eventPackage.equals("com.android.packageinstaller"))
         {
-            if(nameActivity.equals(accessibility_service_label)){
-                startLock();
-            }
-            else if(nameActivity.equals(app_name)){
+            if(flagIsLock){
                 startLock();
             }
             else{
-				startLock();
             }
 
         }
+        else {
+            startLock();
+        }
+
     }
 
     /**
@@ -90,7 +100,7 @@ public class Accessibility extends AccessibilityService{
 
         super.onServiceConnected();
         info = new AccessibilityServiceInfo();
-        info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
+        info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | AccessibilityEvent.TYPE_VIEW_CLICKED;
 
         info.packageNames = new String[]
                 {"com.example.admin.event", querySettingPkgName() ,"com.android.packageinstaller"};
