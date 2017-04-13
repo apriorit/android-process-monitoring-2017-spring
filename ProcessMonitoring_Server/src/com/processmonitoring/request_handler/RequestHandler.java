@@ -1,6 +1,5 @@
 package com.processmonitoring.request_handler;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,23 +29,38 @@ public class RequestHandler {
 					System.out.println("LOGIN: " + listData.get("login"));
 					System.out.println("PASSWORD: " + listData.get("password"));
 					break;
-				case "getAppsList":
-					JSONObject jsonBlacklist = new JSONObject();
+				case "get-list-apps":
+					JSONObject jsonListApps = new JSONObject();
 					int k = 0;
 					 for (Map.Entry<String, Object> entry : listData.entrySet()) {
-						    //System.out.println("Package: " + entry.getKey() + " Name: " + entry.getValue());
-						    if(k < 50) {
-						    	 jsonBlacklist.put(entry.getKey(), entry.getValue()); 
+						 if(!entry.getKey().equals("requestType")) {
+							 if(k < 10) {
+					    		 jsonListApps.put(entry.getKey(), entry.getValue()); 
+						    } else {
+						    	jsonListApps.put(entry.getKey(), entry.getValue()); 
+						    	RequestHandler.sendResponseToDevice("list-apps", jsonListApps.toString());
+						    	jsonListApps.clear();
+						    	k = 0;
 						    }
 						    k++;
+						 }  
 					 }	
 					 //Send back list of apps to android device
-					RequestHandler.sendResponseToDevice("updateBlacklist", jsonBlacklist.toString());
+					RequestHandler.sendResponseToDevice("list-apps", jsonListApps.toString());
 					 break;
-				case "updateBlackList":
+				case "update-blacklist":
+					JSONObject jsonBlacklist = new JSONObject();
 					 for (Map.Entry<String, Object> entry : listData.entrySet()) {
-						  System.out.println("BLOCKED APP: Package: " + entry.getKey() + " Name: " + entry.getValue());
+						  if(!entry.getKey().equals("requestType")) {
+							  System.out.println("BLOCKED APP: Package: " + entry.getKey() + " Name: " + entry.getValue());
+							  jsonBlacklist.put(entry.getKey(), entry.getValue()); 
+						 }
+						   
 					 }	
+					 //Send back list of apps to android device
+					 //SQLite database on device will be updated
+					RequestHandler.sendResponseToDevice("update-blacklist", jsonBlacklist.toString());
+						
 					break;
 				default:
 					break;
@@ -54,8 +68,6 @@ public class RequestHandler {
 		} catch(ParseException e) {
 			e.printStackTrace();
 		}
-		
-		
 	}
 	/**
 	 * Sends data to device
@@ -64,7 +76,7 @@ public class RequestHandler {
 	 public static void sendResponseToDevice(String requestType, String data) {
 		    String messageId = Util.getUniqueMessageId();
 	 		Map<String, String> dataPayload = new HashMap<String, String>();
-	 		dataPayload.put("type", requestType);
+	 		dataPayload.put("requestType", requestType);
 	 		dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, data);
 	 		CcsOutgoingMessage message = new CcsOutgoingMessage(Util.Device_token, messageId, dataPayload);
 	 		String jsonRequest = MessageHelper.createJsonOutMessage(message);

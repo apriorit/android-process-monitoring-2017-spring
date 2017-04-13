@@ -4,7 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,15 +45,16 @@ public class ProcessMonitoringHttpServer {
 	        	InputStreamReader isr =  new InputStreamReader(t.getRequestBody(),"utf-8");
 	        	BufferedReader br = new BufferedReader(isr);
 	        	String requestFromDesktopClient = br.readLine();
-	        	System.out.println("Message from desktop client: " + requestFromDesktopClient);
+	        	System.out.println("Message from desktop client5: " + requestFromDesktopClient);
 	        	
-	        	RequestHandler.sendResponseToDevice("requestListApps", requestFromDesktopClient);
-
-	        	String response = "Response from HttpServer";
-	            t.sendResponseHeaders(200, response.length());
-	            OutputStream os = t.getResponseBody();
-	            os.write(response.getBytes());
-	            os.close();
+	        	//RequestHandler.sendResponseToDevice("requestListApps", requestFromDesktopClient);
+	        	
+	        	String response = "Ответ от сервера";
+	        	byte[] response_data = response.getBytes("UTF-8");
+	        	t.sendResponseHeaders(200, response_data.length);
+	        	OutputStream os = t.getResponseBody();
+	        	os.write(response_data);
+	        	os.close();
 	        }
 	    }
 }

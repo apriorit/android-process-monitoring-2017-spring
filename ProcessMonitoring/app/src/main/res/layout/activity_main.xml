@@ -5,18 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-    <EditText
-        android:id="@+id/editTextToken"
-        android:inputType="text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10" />
-    <EditText
-        android:id="@+id/editTextMessage"
-        android:inputType="text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10" />
     <Button
         android:id="@+id/btnHide"
         android:onClick="HideApplication"
@@ -29,4 +17,35 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="OpenDeviceManagementActivity" />
+    <Button
+        android:id="@+id/btnShowBlacklist"
+        android:onClick="ShowBlacklist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="show blacklist" />
+    <Button
+        android:id="@+id/activate_admin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Activate Admin"
+        android:onClick="onClick"
+        android:textSize="22dp"
+        android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/deactivate_admin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/activate_admin"
+        android:onClick="onClick"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="11dp"
+        android:text="Deactivate Admin"
+        android:textSize="22dp"
+        android:textStyle="bold" />
+    <ListView
+        android:id="@+id/listViewBlacklist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    </ListView>
 </LinearLayout>

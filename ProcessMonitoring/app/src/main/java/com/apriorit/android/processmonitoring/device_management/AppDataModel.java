@@ -5,10 +5,12 @@ package com.apriorit.android.processmonitoring.device_management;
  * which displays the list of applications other's device
  */
 class AppDataModel {
+    private String PackageName;
     private String AppName;
     private Boolean isBlocked;
 
-    AppDataModel(String name, Boolean isBlocked) {
+    AppDataModel(String PackageName, String name, Boolean isBlocked) {
+        this.PackageName = PackageName;
         this.AppName = name;
         this.isBlocked = isBlocked;
     }
@@ -24,5 +26,9 @@ class AppDataModel {
 
     String getAppName() {
         return AppName;
+    }
+
+    String getPackageName() {
+        return PackageName;
     }
 }
