@@ -48,10 +48,11 @@ public class Accessibility extends AccessibilityService {
         info.packageNames = new String[blackList.size()];
         int k = 0;
         for (AppData app : blackList) {
-            info.packageNames[k] = app.getPackageName();
-            k++;
+            if(app.isBlocked() == 1) {
+                info.packageNames[k] = app.getPackageName();
+                k++;
+            }
         }
-        this.setServiceInfo(info);
     }
 
     @Override
@@ -91,7 +92,7 @@ public class Accessibility extends AccessibilityService {
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            attachBlacklistToAccessibility();
+            onServiceConnected();
         }
     };
 

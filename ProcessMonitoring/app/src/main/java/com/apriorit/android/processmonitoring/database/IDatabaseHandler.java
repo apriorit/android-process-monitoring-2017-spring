@@ -12,5 +12,6 @@ public interface IDatabaseHandler {
     public int updateApplication(AppData contact);
     public void deleteApplicationData(AppData contact);
     public void deleteAll();
+    public void clearBlacklist();
 }
 

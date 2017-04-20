@@ -9,17 +9,17 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.apriorit.android.processmonitoring.database.AppData;
 import com.apriorit.android.processmonitoring.database.DatabaseHandler;
 import com.apriorit.android.processmonitoring.device_administrator.PolicyManager;
-import com.apriorit.android.processmonitoring.device_management.DeviceManagementActivity;
 import com.apriorit.android.processmonitoring.request_handler.Handler;
+import com.apriorit.android.processmonitoring.select_device.SelectDeviceActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
@@ -29,6 +29,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private BroadcastReceiver mRegistrationBroadcastReceiver;
     private Handler requestHander;
     private PolicyManager mPolicyManager;
+
+    private EditText mEditLogin;
+    private EditText mEditPassword;
 
     // Used to load the 'native-lib' library on application startup.
     static {
@@ -40,20 +43,22 @@ public class MainActivity extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mEditLogin = (EditText) findViewById(R.id.editTextLogin);
+        mEditPassword = (EditText) findViewById(R.id.editTextPassword);
+
         gcmRegistration();
 
         initSQLiteDatabaseBlacklist();
         requestHander = new Handler(this);
-        registerAccount();
 
         mPolicyManager = new PolicyManager(this);
     }
 
     private void initSQLiteDatabaseBlacklist() {
         DatabaseHandler db = new DatabaseHandler(this);
-        db.addApplicationData(new AppData("com.example.admin.event", "Event"));
-        db.addApplicationData(new AppData("com.android.settings", "Settings"));
-        db.addApplicationData(new AppData("com.android.packageinstaller", "PackageInstaller"));
+        db.addApplicationData(new AppData("com.example.admin.event", "Event", 1));
+        db.addApplicationData(new AppData("com.android.settings", "Settings", 1));
+        db.addApplicationData(new AppData("com.android.packageinstaller", "PackageInstaller", 1));
     }
 
     /*
@@ -94,11 +99,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
      * Sends some registration data to GCM server
      * XMPP server saves in database user data and device token
      */
-    private void registerAccount() {
+    public void registerAccount(View v) {
         Bundle registrationData = new Bundle();
-        registrationData.putString("requestType", "registration");
-        registrationData.putString("login", "User");
-        registrationData.putString("password", "some password");
+        registrationData.putString("requestType", "account_registration");
+        registrationData.putString("login", mEditLogin.getText().toString());
+        registrationData.putString("password", mEditPassword.getText().toString());
         requestHander.SendDataToServer(registrationData);
     }
 
@@ -123,12 +128,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
         pm.setComponentEnabledSetting(getComponentName(), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
     }
 
-    public void OpenDeviceManagementActivity(View v) {
-        Intent myIntent = new Intent(MainActivity.this, DeviceManagementActivity.class);
-        myIntent.putExtra("key", "some_id_user");
-        MainActivity.this.startActivity(myIntent);
+    public void controlCurrentDevice(View v) {
+        Intent intent = new Intent(MainActivity.this, SelectDeviceActivity.class);
+        intent.putExtra("mode", "children");
+        intent.putExtra("login", "Dmitry");
+        MainActivity.this.startActivity(intent);
     }
-
+    public void controlOtherDevices(View v) {
+        Intent intent = new Intent(MainActivity.this, SelectDeviceActivity.class);
+        intent.putExtra("mode", "parent");
+        intent.putExtra("login", "Dmitry");
+        MainActivity.this.startActivity(intent);
+    }
     public void ShowBlacklist(View v) {
         DatabaseHandler db = new DatabaseHandler(this);
         List<AppData> blackList = db.getAllApps();
@@ -185,7 +196,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         if (resultCode == Activity.RESULT_OK
                 && requestCode == PolicyManager.DPM_ACTIVATION_REQUEST_CODE) {
             // handle code for successfull enable of admin
-            Log.d("Device administrator", "successfull enable of admin");
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }

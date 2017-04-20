@@ -13,6 +13,7 @@
 
     <uses-permission android:name="com.apriorit.android.processmonitoring.permission.C2D_Message" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -55,7 +56,9 @@
                 <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
-        <activity android:name=".device_management.DeviceManagementActivity"></activity>
+
+        <activity android:name=".device_management.DeviceManagementActivity" />
+
         <service
             android:name=".Accessibility"
             android:enabled="true"
@@ -64,14 +67,13 @@
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
-
         </service>
 
-        <activity android:name=".Lock"></activity>
+        <activity android:name=".Lock" />
 
         <receiver
             android:name=".device_administrator.DeviceAdministratorReceiver"
-            android:permission="android.permission.BIND_DEVICE_ADMIN" >
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
             <meta-data
                 android:name="android.app.device_admin"
                 android:resource="@xml/device_admin" />
@@ -82,6 +84,8 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_DISABLED" />
             </intent-filter>
         </receiver>
+
+        <activity android:name=".select_device.SelectDeviceActivity"></activity>
     </application>
 
 </manifest>

@@ -9,6 +9,12 @@ MainWindow::MainWindow(QWidget *parent) :
     btnSendRequest = new QPushButton("Send request", this);
     btnSendRequest->setGeometry(QRect(QPoint(10, 10), QSize(100, 30)));
 
+    btnSetCoordinates = new QPushButton("Set coordinates", this);
+    btnSetCoordinates->setGeometry(QRect(QPoint(150, 10), QSize(100, 30)));
+    btnSetCoordinates->setCheckable(true);
+
+    connect(btnSetCoordinates, SIGNAL(released()), this, SLOT(showMap()));
+
     //connect the signal to the appropriate slot
     connect(btnSendRequest, SIGNAL (released()), this, SLOT (sendRequest()));
     manager = new QNetworkAccessManager(this);
@@ -36,12 +42,24 @@ MainWindow::MainWindow(QWidget *parent) :
     item->setProperty("device_latitude", 48.48508294);
     item->setProperty("device_longitude", 35.08914748);
 }
+
 //Handles response from our App server
 void MainWindow::Response(QNetworkReply *reply){
     QByteArray data = reply->readAll();
     QString response = QString::fromUtf8(data);
     qDebug() << response;
     label->setText(response);
+
+    //parse json string
+    QJsonDocument jsonResponse = QJsonDocument::fromJson(response.toUtf8());
+    QJsonObject jsonObjTemp = jsonResponse.object();
+    QJsonObject::iterator it;
+
+    for (it = jsonObjTemp.begin(); it != jsonObjTemp.end(); it++) {
+          QString package = it.key();
+          QString appName =  it.value().toString();
+          qDebug() << package  << "  " << appName;
+      }
 }
 //Sends message to our App server
 void MainWindow::sendRequest() {
@@ -58,10 +76,13 @@ void MainWindow::sendRequest() {
 
     manager->post(qNetworkRequest, postData);
 
-    //change location of marker
-    item->setProperty("device_latitude", 48.46963499);
-    item->setProperty("device_longitude", 35.03785193);
 }
+void MainWindow::showMap() {
+    //change location of marker
+    item->setProperty("device_latitude", 48.47036766);
+    item->setProperty("device_longitude", 35.03392518);
+}
+
 MainWindow::~MainWindow()
 {
     delete ui;

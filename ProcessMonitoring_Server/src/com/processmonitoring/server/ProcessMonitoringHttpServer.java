@@ -50,6 +50,7 @@ public class ProcessMonitoringHttpServer {
 	        	//RequestHandler.sendResponseToDevice("requestListApps", requestFromDesktopClient);
 	        	
 	        	String response = "Ответ от сервера";
+	        	
 	        	byte[] response_data = response.getBytes("UTF-8");
 	        	t.sendResponseHeaders(200, response_data.length);
 	        	OutputStream os = t.getResponseBody();
