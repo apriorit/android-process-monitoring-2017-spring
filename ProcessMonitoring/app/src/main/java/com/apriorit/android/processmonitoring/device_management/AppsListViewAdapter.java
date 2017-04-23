@@ -56,16 +56,16 @@ class AppsListViewAdapter extends BaseAdapter {
         //Get the data model for this position
         // AppDataModel p = getAppModel(position);
         nameApp.setText(mListAppsDataModel.get(position).getAppName());
-        switchAppAccess.setChecked(mListAppsDataModel.get(position).getAccess());
+        switchAppAccess.setChecked((mListAppsDataModel.get(position).getAccess() != 0));
 
         //Handles click on switch
         switchAppAccess.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (switchAppAccess.isChecked()) {
-                    setAccess(position, true);
+                    setAccess(position, 1);
                 } else {
-                    setAccess(position, false);
+                    setAccess(position, 0);
                 }
             }
         });
@@ -75,7 +75,7 @@ class AppsListViewAdapter extends BaseAdapter {
     /**
      * Adds or deletes application from Blacklist
      */
-    private void setAccess(int position, Boolean access) {
+    private void setAccess(int position, int access) {
         ((AppDataModel) getItem(position)).setAccess(access);
     }
 

@@ -7,19 +7,21 @@ public class AppData {
     private int id;
     private String packageName;
     private String appName;
-
+    private int isBlocked;
     public AppData(){
     }
 
-    public AppData(int id, String package_name, String app_name){
+    public AppData(int id, String package_name, String app_name, int isBlocked){
         this.id = id;
         this.packageName = package_name;
         this.appName = app_name;
+        this.isBlocked = isBlocked;
     }
 
-    public AppData(String package_name, String app_name){
+    public AppData(String package_name, String app_name, int isBlocked){
         this.packageName = package_name;
         this.appName = app_name;
+        this.isBlocked = isBlocked;
     }
 
     public int getID(){
@@ -44,5 +46,12 @@ public class AppData {
 
     public void setAppName(String app_name){
         this.appName = app_name;
+    }
+
+    public void setAccess(int access) {
+        isBlocked = access;
+    }
+    public int isBlocked() {
+        return isBlocked;
     }
 }

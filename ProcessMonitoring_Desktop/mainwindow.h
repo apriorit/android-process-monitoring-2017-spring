@@ -13,6 +13,12 @@
 #include <QNetworkReply>
 #include <QPushButton>
 #include <QLabel>
+#include <QQuickView>
+#include <QQuickItem>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+
 namespace Ui {
 class MainWindow;
 }
@@ -28,12 +34,16 @@ public:
 private:
     Ui::MainWindow *ui;
     QPushButton *btnSendRequest;
+    QPushButton *btnSetCoordinates;
     //This class allows the application to send network requests and receive replies
     QNetworkAccessManager* manager;
     QLabel *label;
+    QQuickView *view;
+    QQuickItem *item;
 private slots:
     void Response(QNetworkReply* reply);
     void sendRequest();
+    void showMap();
 };
 
 #endif // MAINWINDOW_H

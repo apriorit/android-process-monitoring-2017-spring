@@ -7,20 +7,20 @@ package com.apriorit.android.processmonitoring.device_management;
 class AppDataModel {
     private String PackageName;
     private String AppName;
-    private Boolean isBlocked;
+    private int isBlocked;
 
-    AppDataModel(String PackageName, String name, Boolean isBlocked) {
+    AppDataModel(String PackageName, String name, int isBlocked) {
         this.PackageName = PackageName;
         this.AppName = name;
         this.isBlocked = isBlocked;
     }
 
     //Defines if application will be blocked on other's device
-    void setAccess(Boolean access) {
+    void setAccess(int access) {
         isBlocked = access;
     }
 
-    Boolean getAccess() {
+    int getAccess() {
         return isBlocked;
     }
 

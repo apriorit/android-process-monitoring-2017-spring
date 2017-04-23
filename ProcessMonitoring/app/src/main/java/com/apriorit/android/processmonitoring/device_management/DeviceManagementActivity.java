@@ -27,6 +27,8 @@ public class DeviceManagementActivity extends AppCompatActivity {
     private Handler requestHander;
     private AppsListViewAdapter mListViewAdapter;
 
+    private String mUserID;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,10 +41,10 @@ public class DeviceManagementActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         //some data from MainActivity
-        String id_user = intent.getStringExtra("key");
+        mUserID = intent.getStringExtra("user-id");
 
         //Sends request to server
-        requestHander.HandleListApps();
+        requestHander.requestListApps(mUserID);
     }
 
     @Override
@@ -67,11 +69,13 @@ public class DeviceManagementActivity extends AppCompatActivity {
     };
 
     /**
-     * Sends list of apps to GCM server
-     * GCM server will deliver it to our XMPP server
+     * request list with apps
      */
-    public void getListAppsFromDevice(View view) {
-        requestHander.HandleListApps();
+    public void updateList(View view) {
+        Bundle data = new Bundle();
+        data.putString("requestType", "update-list");
+        data.putString("user-id", mUserID);
+        requestHander.SendDataToServer(data);
     }
 
     private void updateListView(Intent intent) {
@@ -81,14 +85,16 @@ public class DeviceManagementActivity extends AppCompatActivity {
             JSONObject jsonObj = new JSONObject(intent.getStringExtra("list"));
             Map<String, Object> mSourceListApps = JsonHelper.toMap(jsonObj);
             for (Map.Entry<String, Object> entry : mSourceListApps.entrySet()) {
-                mListAppDataModel.add(new AppDataModel(entry.getKey(), entry.getValue().toString(), false));
+                JSONObject jsonAppData = new JSONObject(entry.getValue().toString());
+                String aName = (String) jsonAppData.get("app-name");
+                int isBlocked = jsonAppData.getInt("isblocked");
+                mListAppDataModel.add(new AppDataModel(entry.getKey(), aName, isBlocked));
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
         //Set adapter and show list
         mListViewAdapter = new AppsListViewAdapter(this, mListAppDataModel);
-
         mListViewApps.setAdapter(mListViewAdapter);
     }
 
@@ -98,15 +104,22 @@ public class DeviceManagementActivity extends AppCompatActivity {
     public void sendBlacklist(View v) {
         Bundle blockedApps = new Bundle();
         blockedApps.putString("requestType", "update-blacklist");
-        //Adding list of blocked apps to bundle
-        for (int i = 0; i < mListViewAdapter.getCount(); i++) {
-            AppDataModel app = (AppDataModel) mListViewAdapter.getItem(i);
-            if (app.getAccess()) {
-                blockedApps.putString(app.getPackageName(), app.getAppName());
+        blockedApps.putString("user-id", mUserID);
+        JSONObject jsonAppData;
+        try {
+            //Adding list of blocked apps to bundle
+            for (int i = 0; i < mListViewAdapter.getCount(); i++) {
+                AppDataModel app = (AppDataModel) mListViewAdapter.getItem(i);
+                jsonAppData = new JSONObject();
+                jsonAppData.put("app-name", app.getAppName());
+                jsonAppData.put("isblocked", app.getAccess());
+                blockedApps.putString(app.getPackageName(), jsonAppData.toString());
             }
+            //Send list of blocked apps to server
+            if (blockedApps.size() != 0)
+                requestHander.SendDataToServer(blockedApps);
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-        //Send list of blocked apps to server
-        if (blockedApps.size() != 0)
-            requestHander.SendDataToServer(blockedApps);
     }
 }

@@ -8,9 +8,11 @@ import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
+import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.PacketExtension;
+import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.provider.PacketExtensionProvider;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.json.simple.JSONValue;
@@ -125,12 +127,12 @@ public class XMPPServer implements PacketListener {
 
 		// Handle incoming packets (the class implements the PacketListener)
 		connection.addPacketListener(this, new PacketTypeFilter(Message.class));
-
+	
 		// Log all outgoing packets
 		connection.addPacketWriterInterceptor(new PacketInterceptor() {
 			@Override
 			public void interceptPacket(Packet packet) {
-				logger.log(Level.INFO, "Sent: {0}", packet.toXML());
+				System.out.println("INTERCEPT PACKAGE: " + packet.toXML());
 			}
 		}, new PacketTypeFilter(Message.class));
 		connection.login(fcmServerUsername, mApiKey);
@@ -161,17 +163,17 @@ public class XMPPServer implements PacketListener {
 		Message incomingMessage = (Message) packet;
 		GcmPacketExtension gcmPacket = (GcmPacketExtension) incomingMessage.getExtension(Util.FCM_NAMESPACE);
 		String json = gcmPacket.getJson();
+	
 		try {
 			Map<String, Object> jsonMap = (Map<String, Object>) JSONValue.parseWithException(json);
 			//get device token which will be saved in database
-			Util.Device_token = jsonMap.get("from").toString();
-			System.out.println("Device_token: " + Util.Device_token);
-	            
+			String deviceToken = jsonMap.get("from").toString();
+			 
 			//retrieves data from android device
 			String data = jsonMap.get("data").toString();
 			
 			//Handle request from android device
-			RequestHandler.handleRequest(data);
+			RequestHandler.handleRequest(deviceToken, data);
 			
 			Object messageType = jsonMap.get("message_type");
 		 

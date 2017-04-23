@@ -39,8 +39,8 @@ public class GCMPushReceiverService extends GcmListenerService {
                         intentUpdateList.putExtra("list", data.getString("LIST_APPS"));
                         sendBroadcast(intentUpdateList);
                         break;
-                    case "get-list-apps":
-                        handler.HandleListApps();
+                    case "update-list":
+                        handler.sendDeviceInfo(Integer.parseInt(data.getString("LIST_APPS")));
                         break;
                     case "location":
                         handler.HandleDeviceLocation();
@@ -50,6 +50,11 @@ public class GCMPushReceiverService extends GcmListenerService {
                         handler.updateBlacklistInDB(data.getString("LIST_APPS"));
                         intentUpdateList = new Intent("UPDATE_BLACKLIST");
                         //notificate accessibility service to update blacklist
+                        sendBroadcast(intentUpdateList);
+                        break;
+                    case "list-devices":
+                        intentUpdateList = new Intent("LIST_DEVICES");
+                        intentUpdateList.putExtra("list-devices", data.getString("LIST_APPS"));
                         sendBroadcast(intentUpdateList);
                         break;
                     default:
