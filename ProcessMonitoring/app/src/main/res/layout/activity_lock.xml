@@ -17,5 +17,6 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="172dp"
-        android:id="@+id/unlock" />
+        android:onClick="unlockApp"
+        android:id="@+id/btn_unlock" />
 </RelativeLayout>

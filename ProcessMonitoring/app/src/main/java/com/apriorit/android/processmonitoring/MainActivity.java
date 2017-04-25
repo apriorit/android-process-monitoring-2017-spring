@@ -47,18 +47,11 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mEditPassword = (EditText) findViewById(R.id.editTextPassword);
 
         gcmRegistration();
-
-        initSQLiteDatabaseBlacklist();
         requestHander = new Handler(this);
 
         mPolicyManager = new PolicyManager(this);
-    }
 
-    private void initSQLiteDatabaseBlacklist() {
-        DatabaseHandler db = new DatabaseHandler(this);
-        db.addApplicationData(new AppData("com.example.admin.event", "Event", 1));
-        db.addApplicationData(new AppData("com.android.settings", "Settings", 1));
-        db.addApplicationData(new AppData("com.android.packageinstaller", "PackageInstaller", 1));
+        requestHander.initSQLiteDatabaseBlacklist();
     }
 
     /*
@@ -134,12 +127,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
         intent.putExtra("login", "Dmitry");
         MainActivity.this.startActivity(intent);
     }
+
     public void controlOtherDevices(View v) {
         Intent intent = new Intent(MainActivity.this, SelectDeviceActivity.class);
         intent.putExtra("mode", "parent");
         intent.putExtra("login", "Dmitry");
         MainActivity.this.startActivity(intent);
     }
+
     public void ShowBlacklist(View v) {
         DatabaseHandler db = new DatabaseHandler(this);
         List<AppData> blackList = db.getAllApps();
@@ -199,7 +194,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
-
     }
 
     /**

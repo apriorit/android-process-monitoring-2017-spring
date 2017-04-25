@@ -22,18 +22,18 @@ import java.util.Iterator;
 import java.util.List;
 
 
-public class Accessibility extends AccessibilityService{
-    private String querySettingPkgName(){
+public class Accessibility extends AccessibilityService {
+    private static final String TAG = "AccessibilityService";
+    private AccessibilityServiceInfo info;
+
+    private String querySettingPkgName() {
         Intent intent = new Intent(Settings.ACTION_SETTINGS);
         List<ResolveInfo> resolveInfos = getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        if(resolveInfos == null || resolveInfos.size() == 0){
+        if (resolveInfos == null || resolveInfos.size() == 0) {
             return "";
         }
         return resolveInfos.get(0).activityInfo.packageName;
     }
-
-    private AccessibilityServiceInfo info;
-    static final String TAG = "RecorderService";
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
@@ -41,52 +41,38 @@ public class Accessibility extends AccessibilityService{
         String accessibility_service_label = getString(R.string.accessibility_service_label);
         Log.d(TAG, accessibility_service_label);
         List<CharSequence> wordsInWindow = event.getText();
-
-        Log.d(TAG, String.format("packageName: %s  className %s eventType %s text %s" , event.getPackageName(), event.getClassName(), event.getEventType(),event.getText()));
+        Log.d(TAG, String.format("packageName: %s  className %s eventType %s text %s", event.getPackageName(), event.getClassName(), event.getEventType(), event.getText()));
 
         //name apps in settings
         Boolean flagIsLock = false;
         Iterator<CharSequence> iter = wordsInWindow.iterator();
-        while (iter.hasNext()){
+        while (iter.hasNext()) {
             String word = (String) iter.next();
             Log.d(TAG, word);
-            if(word.equals(app_name) || word.equals(accessibility_service_label)){
+            if (word.equals(app_name) || word.equals(accessibility_service_label)) {
                 flagIsLock = true;
 
             }
         }
-       // String nameActivity = (String) wordsInWindow.get(0);
-        //Log.d(TAG, nameActivity);
+
         String eventPackage = String.valueOf(event.getPackageName());
         Log.d(TAG, eventPackage);
-        if(eventPackage.equals(querySettingPkgName()) || eventPackage.equals("com.android.packageinstaller"))
-        {
-            if(flagIsLock){
-                startLock();
-            }
-            else{
-            }
 
-        }
-        else {
-            startLock();
-        }
-
-    }
-
-    /**
-     * Updates package names in AccessibilityServiceInfo
-     */
-    private void attachBlacklistToAccessibility() {
         DatabaseHandler db = new DatabaseHandler(this);
         List<AppData> blackList = db.getAllApps();
 
-        info.packageNames = new String[blackList.size()];
-        int k = 0;
+        //compare current application with blacklist
         for (AppData app : blackList) {
-            if(app.isBlocked() == 1) {
-                info.packageNames[k] = app.getPackageName();
-                k++;
+            if (app.isBlocked() == 1) {
+                if (eventPackage.equals(app.getPackageName()) && (app.getPackageName().equals(querySettingPkgName()) || app.getPackageName().equals("com.android.packageinstaller"))) {
+                    if (flagIsLock) {
+                        startLock(eventPackage);
+                    }
+                } else {
+                    if (eventPackage.equals(app.getPackageName())) {
+                        startLock(eventPackage);
+                    }
+                }
             }
         }
     }
@@ -103,27 +89,33 @@ public class Accessibility extends AccessibilityService{
         info = new AccessibilityServiceInfo();
         info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | AccessibilityEvent.TYPE_VIEW_CLICKED;
 
-        info.packageNames = new String[]
-                {"com.example.admin.event", querySettingPkgName() ,"com.android.packageinstaller"};
+        DatabaseHandler db = new DatabaseHandler(this);
+        List<AppData> blackList = db.getAllApps();
 
-        attachBlacklistToAccessibility();
+        //Updates package names in AccessibilityServiceInfo
+        info.packageNames = new String[db.getCountOfBlockedApps()];
+        int k = 0;
+        for (AppData app : blackList) {
+            if (app.isBlocked() == 1) {
+                info.packageNames[k] = app.getPackageName();
+                k++;
+            }
+        }
 
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN;
         info.notificationTimeout = 100;
         this.setServiceInfo(info);
-        Log.d(TAG, "onServiceConnected");
-
 
         //register Broadcastreceiver
         registerReceiver(receiver, new IntentFilter("UPDATE_BLACKLIST"));
-
     }
 
     //запускаем окно блокировки
-    public void startLock() {
+    public void startLock(String packageName) {
         try {
             Intent intent = new Intent(Accessibility.this, Lock.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("packageName", packageName);
             startActivity(intent);
 
         } catch (Exception e) {

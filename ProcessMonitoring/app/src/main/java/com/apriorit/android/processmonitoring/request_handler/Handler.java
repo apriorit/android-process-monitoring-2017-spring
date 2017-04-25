@@ -2,10 +2,13 @@ package com.apriorit.android.processmonitoring.request_handler;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.apriorit.android.processmonitoring.R;
 import com.apriorit.android.processmonitoring.database.AppData;
@@ -16,15 +19,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Handler {
     private Context mContext;
+    private DatabaseHandler mDatabaseHandler;
 
     public Handler(Context context) {
         mContext = context;
+        mDatabaseHandler = new DatabaseHandler(mContext);
     }
 
     /**
@@ -37,18 +43,26 @@ public class Handler {
         data.putString("user-id", Integer.toString(userID));
 
         List<ResolveInfo> listApps = getListApps();
+        Map<String, AppData> mapFullList = new HashMap<>();
+
         try {
             JSONObject jsonDeviceInfo;
-            //add this list to database
-            for (int i = 0; i < listApps.size(); i++) {
-                db.addApplicationData(new AppData(listApps.get(i).activityInfo.packageName, listApps.get(i).loadLabel(mContext.getPackageManager()).toString(), 0));
-            }
+
+            //Add blacklist from sqlite
             List<AppData> blackList = db.getAllApps();
             for (AppData app : blackList) {
+                mapFullList.put(app.getPackageName(), app);
+            }
+
+            for (int i = 0; i < listApps.size(); i++) {
+                mapFullList.put(listApps.get(i).activityInfo.packageName, new AppData(listApps.get(i).activityInfo.packageName, listApps.get(i).loadLabel(mContext.getPackageManager()).toString(), 0));
+            }
+
+            for (Map.Entry<String, AppData> app : mapFullList.entrySet()) {
                 jsonDeviceInfo = new JSONObject();
-                jsonDeviceInfo.put("app-name", app.getAppName());
-                jsonDeviceInfo.put("isblocked", app.isBlocked());
-                data.putString(app.getPackageName(), jsonDeviceInfo.toString());
+                jsonDeviceInfo.put("app-name", app.getValue().getAppName());
+                jsonDeviceInfo.put("isblocked", app.getValue().isBlocked());
+                data.putString(app.getKey(), jsonDeviceInfo.toString());
             }
             SendDataToServer(data);
         } catch (JSONException e) {
@@ -62,12 +76,14 @@ public class Handler {
         data.putString("user-id", userID);
         SendDataToServer(data);
     }
+
     public void deleteDevice(int userID) {
         Bundle data = new Bundle();
         data.putString("requestType", "delete-device");
         data.putString("user-id", String.valueOf(userID));
         SendDataToServer(data);
     }
+
     /**
      * Gets coordinates and sends it to GCM server
      */
@@ -84,12 +100,23 @@ public class Handler {
         return mContext.getPackageManager().queryIntentActivities(mainIntent, 0);
     }
 
+    /**
+     * Prevents deleting our application
+     */
+    public void initSQLiteDatabaseBlacklist() {
+        mDatabaseHandler.addApplicationData(new AppData("com.example.admin.event", "Event", 1));
+        mDatabaseHandler.addApplicationData(new AppData("com.android.settings", "Settings", 1));
+        mDatabaseHandler.addApplicationData(new AppData("com.android.packageinstaller", "PackageInstaller", 1));
+        mDatabaseHandler.addApplicationData(new AppData(querySettingPkgName(), "AccessibiltiyService", 1));
+    }
+
     /*
         Updates SQLite database which stores blacklist
     */
     public void updateBlacklistInDB(String jsonUpdatedBlacklist) {
-        DatabaseHandler db = new DatabaseHandler(mContext);
-        db.clearBlacklist();
+        mDatabaseHandler.clearBlacklist();
+        initSQLiteDatabaseBlacklist();
+
         try {
             //parse json string
             JSONObject jsonObj = new JSONObject(jsonUpdatedBlacklist);
@@ -98,11 +125,22 @@ public class Handler {
                 JSONObject jsonListApps = new JSONObject(entry.getValue().toString());
                 String appName = (String) jsonListApps.get("app-name");
                 int isBlocked = jsonListApps.getInt("isblocked");
-                db.addApplicationData(new AppData(entry.getKey(), appName, isBlocked));
+                if (isBlocked == 1) {
+                    mDatabaseHandler.addApplicationData(new AppData(entry.getKey(), appName, isBlocked));
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    private String querySettingPkgName() {
+        Intent intent = new Intent(Settings.ACTION_SETTINGS);
+        List<ResolveInfo> resolveInfos = mContext.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        if (resolveInfos == null || resolveInfos.size() == 0) {
+            return "";
+        }
+        return resolveInfos.get(0).activityInfo.packageName;
     }
 
     /**
@@ -119,6 +157,7 @@ public class Handler {
                     gcm.send(mContext.getResources().getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com", msgId.toString(), data);
                     return null;
                 } catch (IOException ex) {
+                    Toast.makeText(mContext, "Error sending upstream message", Toast.LENGTH_LONG).show();
                     return "Error sending upstream message:" + ex.getMessage();
                 }
             }
@@ -126,6 +165,7 @@ public class Handler {
             @Override
             protected void onPostExecute(String result) {
                 if (result != null) {
+                    Toast.makeText(mContext, "send message failed", Toast.LENGTH_LONG).show();
                     Log.d("Handler", "send message failed");
                 }
             }

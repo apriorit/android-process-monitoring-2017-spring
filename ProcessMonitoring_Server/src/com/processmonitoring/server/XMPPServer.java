@@ -163,7 +163,7 @@ public class XMPPServer implements PacketListener {
 		Message incomingMessage = (Message) packet;
 		GcmPacketExtension gcmPacket = (GcmPacketExtension) incomingMessage.getExtension(Util.FCM_NAMESPACE);
 		String json = gcmPacket.getJson();
-	
+		
 		try {
 			Map<String, Object> jsonMap = (Map<String, Object>) JSONValue.parseWithException(json);
 			//get device token which will be saved in database

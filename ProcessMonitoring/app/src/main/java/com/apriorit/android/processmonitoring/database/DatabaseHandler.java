@@ -65,7 +65,6 @@ public class DatabaseHandler extends SQLiteOpenHelper implements IDatabaseHandle
         }
 
         AppData app = new AppData(Integer.parseInt(cursor.getString(0)), cursor.getString(1), cursor.getString(2), cursor.getInt(3));
-
         return app;
     }
 
@@ -90,6 +89,16 @@ public class DatabaseHandler extends SQLiteOpenHelper implements IDatabaseHandle
 
         return appList;
     }
+    public int getCountOfBlockedApps() {
+        String selectQuery = "SELECT  * FROM " + TABLE_BLACKLIST;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        int count = cursor.getCount();
+        cursor.close();
+        return count;
+    }
 
     @Override
     public int updateApplication(AppData app) {
@@ -110,7 +119,11 @@ public class DatabaseHandler extends SQLiteOpenHelper implements IDatabaseHandle
         db.delete(TABLE_BLACKLIST, KEY_ID + " = ?", new String[] { String.valueOf(app.getID()) });
         db.close();
     }
-
+    public void deleteAppByPackage(String packageName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_BLACKLIST, KEY_PACKAGE_NAME + " = ?", new String[] { packageName });
+        db.close();
+    }
     @Override
     public void deleteAll() {
         SQLiteDatabase db = this.getWritableDatabase();
