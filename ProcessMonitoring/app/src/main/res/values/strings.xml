@@ -4,5 +4,22 @@
     <string name="btn_send">Send</string>
     <string name="btn_unlock">Unlock</string>>
     <string name="accessibility_service_label">Accessibility</string>
-    <string name="seting_package">com.android.settings</string>>
+    <string name="seting_package">com.android.settings</string>
+
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_name">Fullname</string>
+    <string name="btn_login">Login</string>
+    <string name="btn_register">REGISTER</string>
+    <string name="btn_link_to_register">Not a member? Sign up now.</string>
+    <string name="btn_link_to_login">Already registred! Login Me.</string>
+    <string name="welcome">Welcome</string>
+    <string name="btn_logout">LOGOUT</string>
+    <string name="name">Fullname</string>
+    <string name="hint_key">Master key</string>
+    <string name="hint_key_verify">Master key verify</string>
+    <string name="next_step">Next</string>
+    <string name="title_activity_authentication">AuthenticationActivity</string>
+
+    <string name="sign_out">Sign out</string>
 </resources>

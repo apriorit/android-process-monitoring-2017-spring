@@ -84,6 +84,14 @@ public class Handler {
         SendDataToServer(data);
     }
 
+    public void userAuthentication(String login, String password) {
+        Bundle data = new Bundle();
+        data.putString("requestType", "user-authentication");
+        data.putString("login", login);
+        data.putString("password", password);
+        SendDataToServer(data);
+    }
+
     /**
      * Gets coordinates and sends it to GCM server
      */

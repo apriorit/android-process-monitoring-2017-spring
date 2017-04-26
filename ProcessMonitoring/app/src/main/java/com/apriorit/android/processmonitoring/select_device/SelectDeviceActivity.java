@@ -89,6 +89,9 @@ public class SelectDeviceActivity extends AppCompatActivity {
                         SelectDeviceActivity.this.startActivity(intent);
                     } else {
                         sendDeviceInfoToServer(userID);
+                        //open settings to enable accessibility service
+                        Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                        startActivityForResult(intent, 0);
                     }
                 }
             });

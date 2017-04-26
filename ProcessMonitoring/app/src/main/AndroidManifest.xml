@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".registration.AuthenticationActivity"
             android:exported="true"
             android:label="@string/main_name">
             <intent-filter>
@@ -85,7 +85,15 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".select_device.SelectDeviceActivity"></activity>
+        <activity android:name=".select_device.SelectDeviceActivity" />
+        <activity android:name=".registration.RegistrationActivity" />
+        <!--
+        <activity android:name=".registration.AuthenticationActivity" />
+        -->
+        <activity
+            android:name=".registration.SelectModeActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
     </application>
 
 </manifest>

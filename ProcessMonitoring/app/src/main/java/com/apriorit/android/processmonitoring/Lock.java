@@ -6,18 +6,11 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 
-import com.apriorit.android.processmonitoring.database.DatabaseHandler;
-
 public class Lock extends AppCompatActivity {
-    private String mPackageName;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lock);
-
-        Intent intent = getIntent();
-        mPackageName = intent.getStringExtra("packageName");
     }
 
     @Override
@@ -39,8 +32,9 @@ public class Lock extends AppCompatActivity {
     }
 
     public void unlockApp(View v) {
-        DatabaseHandler db = new DatabaseHandler(this);
-        db.deleteAppByPackage(mPackageName);
+        Intent intentUpdateAccessibility = new Intent("UPDATE_BLACKLIST");
+        intentUpdateAccessibility.putExtra("update_type", "once");
+        sendBroadcast(intentUpdateAccessibility);
         finish();
     }
 }

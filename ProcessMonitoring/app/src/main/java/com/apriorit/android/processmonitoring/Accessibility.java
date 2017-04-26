@@ -23,8 +23,10 @@ import java.util.List;
 
 
 public class Accessibility extends AccessibilityService {
-    private static final String TAG = "AccessibilityService";
+    private static final String TAG = "AccessibiltiyService";
     private AccessibilityServiceInfo info;
+    //allows to launch application only once
+    private boolean mAllowLaunchApp = false;
 
     private String querySettingPkgName() {
         Intent intent = new Intent(Settings.ACTION_SETTINGS);
@@ -61,20 +63,23 @@ public class Accessibility extends AccessibilityService {
         DatabaseHandler db = new DatabaseHandler(this);
         List<AppData> blackList = db.getAllApps();
 
-        //compare current application with blacklist
-        for (AppData app : blackList) {
-            if (app.isBlocked() == 1) {
-                if (eventPackage.equals(app.getPackageName()) && (app.getPackageName().equals(querySettingPkgName()) || app.getPackageName().equals("com.android.packageinstaller"))) {
-                    if (flagIsLock) {
-                        startLock(eventPackage);
-                    }
-                } else {
-                    if (eventPackage.equals(app.getPackageName())) {
-                        startLock(eventPackage);
+        if (!mAllowLaunchApp) {
+            //compare current application with blacklist
+            for (AppData app : blackList) {
+                if (app.isBlocked() == 1) {
+                    if (eventPackage.equals(app.getPackageName()) && (app.getPackageName().equals(querySettingPkgName()) || app.getPackageName().equals("com.android.packageinstaller"))) {
+                        if (flagIsLock) {
+                            startLock(eventPackage);
+                        }
+                    } else {
+                        if (eventPackage.equals(app.getPackageName())) {
+                            startLock(eventPackage);
+                        }
                     }
                 }
             }
         }
+        mAllowLaunchApp = false;
     }
 
     @Override
@@ -127,7 +132,12 @@ public class Accessibility extends AccessibilityService {
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onServiceConnected();
+            String type = intent.getStringExtra("update_type");
+            if (type.equals("once")) {
+                mAllowLaunchApp = true;
+            } else {
+                onServiceConnected();
+            }
         }
     };
 
