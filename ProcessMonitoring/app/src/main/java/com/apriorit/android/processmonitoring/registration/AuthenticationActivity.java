@@ -52,22 +52,28 @@ public class AuthenticationActivity extends AppCompatActivity {
     private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String status = intent.getStringExtra("status");
-            if (status.equals("success")) {
+            String data = intent.getStringExtra("status");
+            if (data.equals("failed")) {
+                Toast.makeText(getApplicationContext(), "Incorrect username or password", Toast.LENGTH_LONG).show();
+            } else {
                 //save in shared preferences
                 mSharedPref.saveLogin(mLogin.getText().toString());
+                mSharedPref.saveKey(data);
+                //open next activity to select mode
                 openSelectModeActivity(mLogin.getText().toString());
-            } else {
-                Toast.makeText(getApplicationContext(), "Incorrect username of password", Toast.LENGTH_LONG).show();
             }
         }
     };
 
+    /**
+     * opens activity where user will chose whether control this device or others
+     */
     private void openSelectModeActivity(String login) {
         Intent intentSelectMode = new Intent(AuthenticationActivity.this, SelectModeActivity.class);
         intentSelectMode.putExtra("login", login);
         AuthenticationActivity.this.startActivity(intentSelectMode);
     }
+
 
     public void openRegistrationActivity(View v) {
         Intent intent = new Intent(AuthenticationActivity.this, RegistrationActivity.class);

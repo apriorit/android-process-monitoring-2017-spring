@@ -3,23 +3,23 @@ package com.apriorit.android.processmonitoring.registration;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-class SharedPreferencesHandler {
+public class SharedPreferencesHandler {
     private SharedPreferences mSharedPref;
     private static final String APP_PREFERENCES = "authentication_data";
     private static final String APP_PREFERENCES_LOGIN = "Login";
     private static final String APP_PREFERENCES_MASTER_KEY = "Key";
 
-    SharedPreferencesHandler(Context context) {
+    public SharedPreferencesHandler(Context context) {
         mSharedPref = context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
     }
 
-    void saveLogin(String login) {
+    public  void saveLogin(String login) {
         SharedPreferences.Editor editor = mSharedPref.edit();
         editor.putString(APP_PREFERENCES_LOGIN, login);
         editor.apply();
     }
 
-    void saveKey(String key) {
+    public void saveKey(String key) {
         SharedPreferences.Editor editor = mSharedPref.edit();
         editor.putString(APP_PREFERENCES_MASTER_KEY, key);
         editor.apply();
@@ -32,7 +32,7 @@ class SharedPreferencesHandler {
         return null;
     }
 
-    void clearData() {
+    public void clearData() {
         SharedPreferences.Editor editor = mSharedPref.edit();
         editor.clear();
         editor.apply();

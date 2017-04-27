@@ -36,15 +36,16 @@ public class RequestHandler {
 				login = (String) listData.get("login");
 				password = (String) listData.get("password");
 				if (DatabaseHandler.checkAuthentication(login, password)) {
-					RequestHandler.sendResponseToDevice(tokenID, "user-authentication", "success");
+					String masterKey = DatabaseHandler.getMasterKey(login);
+					System.out.println("key == " + masterKey);
+					RequestHandler.sendResponseToDevice(tokenID, "user-authentication", masterKey);
 				} else {
 					RequestHandler.sendResponseToDevice(tokenID, "user-authentication", "failed");
 				}
 				break;
 			case "account_registration":
-				System.out.println("registrrrrrrrr " + (String) listData.get("key"));
 				login = (String) listData.get("login");
-				if(DatabaseHandler.checkRegistration(login)) {
+				if (DatabaseHandler.checkRegistration(login)) {
 					DatabaseHandler.addAccount(login, (String) listData.get("password"), (String) listData.get("key"));
 					RequestHandler.sendResponseToDevice(tokenID, "account_registration", "success");
 				} else {
@@ -55,20 +56,14 @@ public class RequestHandler {
 				System.out.println("device registration " + (String) listData.get("login"));
 				DatabaseHandler.addDevice((String) listData.get("login"), (String) listData.get("user_name"), "", "", 0,
 						0);
+				sendListDevices(tokenID, (String) listData.get("login"));
 				break;
 			case "save-device-info":
 				userID = Integer.parseInt((String) listData.get("user-id"));
 				DatabaseHandler.updateDeviceInfo(userID, tokenID, data, 0, 0);
 				break;
 			case "get-list-devices":
-				JSONObject jsonListDevices = new JSONObject();
-				login = (String) listData.get("login");
-				Map<Integer, String> listDevices = DatabaseHandler.getDevices(login);
-				for (Map.Entry<Integer, String> entry : listDevices.entrySet()) {
-					System.out.println("device: " + entry.getKey() + " " + entry.getValue());
-					jsonListDevices.put(entry.getKey(), entry.getValue());
-				}
-				RequestHandler.sendResponseToDevice(tokenID, "list-devices", jsonListDevices.toString());
+				sendListDevices(tokenID, (String) listData.get("login"));
 				break;
 			case "get-list-apps":
 				userID = Integer.parseInt((String) listData.get("user-id"));
@@ -141,6 +136,18 @@ public class RequestHandler {
 			e.printStackTrace();
 		}
 		return jsonListApps.toString();
+	}
+
+	public static void sendListDevices(String deviceToken, String login) {
+		System.out.println("=========== " + "send list devices " + login);
+		JSONObject jsonListDevices = new JSONObject();
+		// login = (String) listData.get("login");
+		Map<Integer, String> listDevices = DatabaseHandler.getDevices(login);
+		for (Map.Entry<Integer, String> entry : listDevices.entrySet()) {
+			System.out.println("device: " + entry.getKey() + " " + entry.getValue());
+			jsonListDevices.put(entry.getKey(), entry.getValue());
+		}
+		RequestHandler.sendResponseToDevice(deviceToken, "list-devices", jsonListDevices.toString());
 	}
 
 	/**

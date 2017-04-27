@@ -17,7 +17,7 @@ public class ProcessMonitoringServer {
 
 	public static void main(String[] args) {
 		DatabaseHandler.initDatabase();
-
+		
 		xmppServer = XMPPServer.prepareClient(fcmProjectSenderId, fcmServerKey, true);
 
 		try {

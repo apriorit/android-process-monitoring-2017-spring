@@ -244,7 +244,7 @@ public class DatabaseHandler {
 			ResultSet rs = preparedStatement.executeQuery();
 			if (rs.next()) {
 				String login = rs.getString(2);
-				if (mLogin.equals(login)) {
+				if (mLogin.equalsIgnoreCase(login)) {
 					return false;
 				}
 			}
@@ -253,5 +253,20 @@ public class DatabaseHandler {
 			e.printStackTrace();
 		}
 		return true;
+	}
+	public static String getMasterKey(String mLogin) {
+		try {
+			String sql = "SELECT * FROM process_monitoring_database.account WHERE login=?";
+			preparedStatement = mConnection.prepareStatement(sql);
+			preparedStatement.setString(1, mLogin);
+			ResultSet rs = preparedStatement.executeQuery();
+			if (rs.next()) {
+				 return rs.getString(4);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

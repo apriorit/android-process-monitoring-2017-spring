@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:background="@color/bg_register"
     tools:context="com.apriorit.android.processmonitoring.registration.SelectModeActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -21,20 +22,33 @@
     </android.support.design.widget.AppBarLayout>
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center">
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="controlThisDevice"
-            android:text="Control this device" />
+        android:gravity="center_vertical"
+        android:paddingLeft="40dp"
+        android:paddingRight="40dp" >
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dip"
+            android:background="@color/btn_login_bg"
+            android:text="Control this device"
+            android:textColor="@color/btn_login"
+            android:onClick="controlThisDevice"
+            android:gravity="center"/>
+
+        <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dip"
+            android:background="@color/btn_login_bg"
+            android:textColor="@color/btn_login"
             android:onClick="controlOtherDevices"
-            android:text="Control other devices" />
+            android:text="Control other devices"
+            android:gravity="center"/>
+
     </LinearLayout>
+
 </android.support.design.widget.CoordinatorLayout>

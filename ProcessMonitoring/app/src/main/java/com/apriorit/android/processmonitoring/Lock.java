@@ -5,12 +5,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.apriorit.android.processmonitoring.registration.SharedPreferencesHandler;
 
 public class Lock extends AppCompatActivity {
+
+    private EditText mInputMasterKey;
+    private SharedPreferencesHandler mSharedPref;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lock);
+
+        mSharedPref = new SharedPreferencesHandler(this);
+        mInputMasterKey = (EditText) findViewById(R.id.inputKey);
     }
 
     @Override
@@ -32,9 +43,17 @@ public class Lock extends AppCompatActivity {
     }
 
     public void unlockApp(View v) {
-        Intent intentUpdateAccessibility = new Intent("UPDATE_BLACKLIST");
-        intentUpdateAccessibility.putExtra("update_type", "once");
-        sendBroadcast(intentUpdateAccessibility);
-        finish();
+        String masterKey = mInputMasterKey.getText().toString();
+        String correctKey = mSharedPref.getMasterKey();
+
+        //check if user entered correct master key
+        if(masterKey.equals(correctKey)) {
+            Intent intentUpdateAccessibility = new Intent("UPDATE_BLACKLIST");
+            intentUpdateAccessibility.putExtra("update_type", "once");
+            sendBroadcast(intentUpdateAccessibility);
+            finish();
+        } else {
+            Toast.makeText(getApplicationContext(), "Wrong key!", Toast.LENGTH_LONG).show();
+        }
     }
 }

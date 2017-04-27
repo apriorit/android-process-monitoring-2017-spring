@@ -1,9 +1,11 @@
 package com.apriorit.android.processmonitoring.select_device;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -89,6 +91,7 @@ public class SelectDeviceActivity extends AppCompatActivity {
                         SelectDeviceActivity.this.startActivity(intent);
                     } else {
                         sendDeviceInfoToServer(userID);
+                        hideApplication();
                         //open settings to enable accessibility service
                         Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
                         startActivityForResult(intent, 0);
@@ -97,7 +100,12 @@ public class SelectDeviceActivity extends AppCompatActivity {
             });
         }
     }
-
+    private void hideApplication() {
+        //hide an application icon from Android applications list
+        PackageManager pm = getApplicationContext().getPackageManager();
+        ComponentName componentName = new ComponentName(this, com.apriorit.android.processmonitoring.registration.AuthenticationActivity.class);
+        pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+    }
     private void sendDeviceInfoToServer(int userID) {
         mRequestHander.sendDeviceInfo(userID);
     }

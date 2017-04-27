@@ -46,6 +46,9 @@ public class SelectModeActivity extends AppCompatActivity {
         if (id == R.id.action_sign_out) {
             mSharedPref.clearData();
             mSharedPref.getLogin();
+            Intent intent = new Intent(SelectModeActivity.this, AuthenticationActivity.class);
+            finish();  //Kill the current activity
+            startActivity(intent); //open Authentication activity
             return true;
         }
         return super.onOptionsItemSelected(item);
