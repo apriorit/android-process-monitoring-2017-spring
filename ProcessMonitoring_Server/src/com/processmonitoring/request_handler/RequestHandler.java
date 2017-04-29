@@ -31,29 +31,35 @@ public class RequestHandler {
 			String password;
 			int userID;
 			String token;
+			Map<String, String> dataPayload = new HashMap<String, String>();
 			switch (type) {
 			case "user-authentication":
 				login = (String) listData.get("login");
 				password = (String) listData.get("password");
+				
+				dataPayload.put("requestType", "user-authentication");
 				if (DatabaseHandler.checkAuthentication(login, password)) {
 					String masterKey = DatabaseHandler.getMasterKey(login);
-					System.out.println("key == " + masterKey);
-					RequestHandler.sendResponseToDevice(tokenID, "user-authentication", masterKey);
+					dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, masterKey);
 				} else {
-					RequestHandler.sendResponseToDevice(tokenID, "user-authentication", "failed");
+					dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, "failed");				
 				}
+				RequestHandler.sendDataToDevice(tokenID, dataPayload);
 				break;
 			case "account_registration":
 				login = (String) listData.get("login");
+				dataPayload.put("requestType", "account_registration");
+				
 				if (DatabaseHandler.checkRegistration(login)) {
 					DatabaseHandler.addAccount(login, (String) listData.get("password"), (String) listData.get("key"));
-					RequestHandler.sendResponseToDevice(tokenID, "account_registration", "success");
+					dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, "success");
+					RequestHandler.sendDataToDevice(tokenID, dataPayload);
 				} else {
-					RequestHandler.sendResponseToDevice(tokenID, "account_registration", "failed");
+					dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, "failed");
 				}
+				RequestHandler.sendDataToDevice(tokenID, dataPayload);
 				break;
 			case "device_registration":
-				System.out.println("device registration " + (String) listData.get("login"));
 				DatabaseHandler.addDevice((String) listData.get("login"), (String) listData.get("user_name"), "", "", 0,
 						0);
 				sendListDevices(tokenID, (String) listData.get("login"));
@@ -77,17 +83,16 @@ public class RequestHandler {
 					}
 				}
 				// Send list with devices to android device
-				RequestHandler.sendResponseToDevice(tokenID, "list-apps", jsonListApps.toString());
+				dataPayload.put("requestType", "list-apps");
+				dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, jsonListApps.toString());
+				RequestHandler.sendDataToDevice(tokenID, dataPayload);
 				break;
 			case "update-blacklist":
-				System.out.println("update-blacklist " + listData.entrySet().toString());
 				userID = Integer.parseInt((String) listData.get("user-id"));
-				System.out.println("userID = " + userID);
-				System.out.println("data list  = " + data);
+				
 				// update only apps list in specific row in mysql database
 				DatabaseHandler.updateListApps(userID, data);
 				// Send new list of apps to specific android device
-
 				token = DatabaseHandler.getToken(userID);
 				Map<String, Object> mapListApps2 = (Map<String, Object>) JSONValue.parseWithException(data);
 				JSONObject jsonListApps2 = new JSONObject();
@@ -97,21 +102,75 @@ public class RequestHandler {
 					}
 
 				}
-
-				RequestHandler.sendResponseToDevice(token, "update-blacklist", jsonListApps2.toString());
-
+				dataPayload.put("requestType", "update-blacklist");
+				dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, jsonListApps2.toString());
+				RequestHandler.sendDataToDevice(token, dataPayload);
 				break;
 			case "update-list":
 				userID = Integer.parseInt((String) listData.get("user-id"));
-				System.out.println("userID: " + userID);
 				token = DatabaseHandler.getToken(userID);
-				System.out.println("(String) listData.get( " + (String) listData.get("user-id"));
-				RequestHandler.sendResponseToDevice(token, "update-list", (String) listData.get("user-id"));
+			
+				dataPayload.put("requestType", "update-list");
+				dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, (String) listData.get("user-id"));
+				RequestHandler.sendDataToDevice(token, dataPayload);
+				break;
+			case "get-file":
+				userID = Integer.parseInt((String) listData.get("user-id"));
+				token = DatabaseHandler.getToken(userID);
+				
+				dataPayload.put("requestType", "get-file");
+				dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, (String) listData.get("user-id"));
+				RequestHandler.sendDataToDevice(token, dataPayload);
 				break;
 			case "delete-device":
-				System.out.println("delete-device");
 				userID = Integer.parseInt((String) listData.get("user-id"));
 				DatabaseHandler.deleteDevice(userID);
+				break;
+			case "get-list-files":
+				userID = Integer.parseInt((String) listData.get("user-id"));
+				token = DatabaseHandler.getToken(userID);
+				String directory = (String) listData.get("directory");
+				
+				dataPayload.put("requestType", "get-list-files");
+				dataPayload.put("directory", directory);
+				dataPayload.put("token", tokenID);
+				RequestHandler.sendDataToDevice(token, dataPayload);
+				break;
+			case "list-files":
+				String tokenSender = (String) listData.get("token");
+				
+				Map<String, Object> mapListFiles = (Map<String, Object>) JSONValue.parseWithException(data);
+				JSONObject jsonListFiles = new JSONObject();
+				for (Map.Entry<String, Object> entry : mapListFiles.entrySet()) {
+					if (!entry.getKey().equals("requestType") && !entry.getKey().equals("token")) {
+						jsonListFiles.put(entry.getKey(), entry.getValue());
+					}
+				}
+				dataPayload.put("requestType", "list-files");
+				dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, jsonListFiles.toString());
+				RequestHandler.sendDataToDevice(tokenSender, dataPayload);
+				
+				break;
+			case "send-file":
+				userID = Integer.parseInt((String) listData.get("user-id"));
+				token = DatabaseHandler.getToken(userID);
+				String path = (String) listData.get("directory");
+				String fileName = (String) listData.get("filename");
+				
+				dataPayload.put("requestType", "send-file");
+				dataPayload.put("filename", fileName);
+				dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, path);
+				
+				RequestHandler.sendDataToDevice(token, dataPayload);
+				break;
+			case "enable-app":
+				login = (String) listData.get("login");
+				password = (String) listData.get("password");
+				
+				if (DatabaseHandler.checkAuthentication(login, password)) {
+					dataPayload.put("requestType", "enable-app");
+					RequestHandler.sendDataToDevice(tokenID, dataPayload);
+				}
 				break;
 			default:
 				break;
@@ -139,26 +198,25 @@ public class RequestHandler {
 	}
 
 	public static void sendListDevices(String deviceToken, String login) {
-		System.out.println("=========== " + "send list devices " + login);
 		JSONObject jsonListDevices = new JSONObject();
 		// login = (String) listData.get("login");
 		Map<Integer, String> listDevices = DatabaseHandler.getDevices(login);
 		for (Map.Entry<Integer, String> entry : listDevices.entrySet()) {
-			System.out.println("device: " + entry.getKey() + " " + entry.getValue());
 			jsonListDevices.put(entry.getKey(), entry.getValue());
 		}
-		RequestHandler.sendResponseToDevice(deviceToken, "list-devices", jsonListDevices.toString());
+		Map<String, String> dataPayload = new HashMap<String, String>();
+		dataPayload.put("requestType", "list-devices");
+		dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, jsonListDevices.toString());
+		RequestHandler.sendDataToDevice(deviceToken, dataPayload);
 	}
 
 	/**
 	 * Sends data to device it can be request or updated list of applications
 	 */
-	public static void sendResponseToDevice(String deviceToken, String requestType, String data) {
+	public static void sendDataToDevice(String deviceReceiver, Map<String, String> dataPayload) {
 		String messageId = Util.getUniqueMessageId();
-		Map<String, String> dataPayload = new HashMap<String, String>();
-		dataPayload.put("requestType", requestType);
-		dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, data);
-		CcsOutgoingMessage message = new CcsOutgoingMessage(deviceToken, messageId, dataPayload);
+
+		CcsOutgoingMessage message = new CcsOutgoingMessage(deviceReceiver, messageId, dataPayload);
 		String jsonRequest = MessageHelper.createJsonOutMessage(message);
 		xmppServer.send(jsonRequest);
 	}

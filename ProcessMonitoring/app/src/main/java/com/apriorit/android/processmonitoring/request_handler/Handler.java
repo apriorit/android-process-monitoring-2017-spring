@@ -1,23 +1,27 @@
 package com.apriorit.android.processmonitoring.request_handler;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.apriorit.android.processmonitoring.R;
 import com.apriorit.android.processmonitoring.database.AppData;
 import com.apriorit.android.processmonitoring.database.DatabaseHandler;
+import com.apriorit.android.processmonitoring.registration.SharedPreferencesHandler;
+import com.apriorit.android.processmonitoring.request_handler.mail.GMailSender;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -151,6 +155,27 @@ public class Handler {
         return resolveInfos.get(0).activityInfo.packageName;
     }
 
+    public void sendListFiles(String token, String folder) {
+        String path;
+        if (folder.equals("root")) {
+            path = Environment.getExternalStorageDirectory().toString();
+        } else {
+            path = folder;
+        }
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        if (files != null) {
+            Bundle data = new Bundle();
+            data.putString("requestType", "list-files");
+            data.putString("token", token);
+            for (int i = 0; i < files.length; i++) {
+                data.putString("file" + String.valueOf(i), files[i].getName());
+            }
+            data.putString("folder", path);
+            SendDataToServer(data);
+        }
+    }
+
     /**
      * Sends data to GCM server
      * GCM server will deliver it to our XMPP server
@@ -174,10 +199,58 @@ public class Handler {
             protected void onPostExecute(String result) {
                 if (result != null) {
                     Toast.makeText(mContext, "send message failed", Toast.LENGTH_LONG).show();
-                    Log.d("Handler", "send message failed");
                 }
             }
         }.execute(null, null, null);
+    }
+
+    public void requestSendFile(String userID, String path, String name) {
+        Bundle data = new Bundle();
+        data.putString("requestType", "send-file");
+        data.putString("user-id", userID);
+        data.putString("directory", path);
+        data.putString("filename", name);
+        SendDataToServer(data);
+    }
+
+    public void requestEnableApp(String login, String password) {
+        Bundle data = new Bundle();
+        data.putString("requestType", "enable-app");
+        data.putString("login", login);
+        data.putString("password", password);
+        SendDataToServer(data);
+    }
+
+    /**
+     * Shows an application icon in Android application list
+     */
+    public void setEnabledSettings(boolean enabled) {
+        PackageManager pm = mContext.getPackageManager();
+        ComponentName componentName = new ComponentName(mContext, com.apriorit.android.processmonitoring.registration.AuthenticationActivity.class);
+        if (enabled) {
+            pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+        } else {
+            pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        }
+    }
+
+    public void sendFile(final String path, final String fileName) {
+        SharedPreferencesHandler sharedPref = new SharedPreferencesHandler(mContext);
+
+        final String emailDestination = sharedPref.getLogin();
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    GMailSender sender = new GMailSender(mContext.getString(R.string.sender_email), mContext.getString(R.string.sender_password));
+                    sender.addAttachment(path, fileName);
+                    sender.sendMail("Data", "File from device",
+                            mContext.getString(R.string.sender_email),
+                            emailDestination);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }
 

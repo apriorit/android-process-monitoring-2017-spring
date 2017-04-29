@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.apriorit.android.processmonitoring.R;
+import com.apriorit.android.processmonitoring.device_management.view_files.ViewFilesActivity;
 import com.apriorit.android.processmonitoring.request_handler.Handler;
 import com.apriorit.android.processmonitoring.request_handler.JsonHelper;
 
@@ -121,5 +122,13 @@ public class DeviceManagementActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public void openViewFilesActivity(View v) {
+        Intent intent = new Intent(DeviceManagementActivity.this, ViewFilesActivity.class);
+        intent.putExtra("user-id", mUserID);
+        DeviceManagementActivity.this.startActivity(intent);
+
+
     }
 }

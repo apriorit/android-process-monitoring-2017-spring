@@ -13,13 +13,13 @@ public class SharedPreferencesHandler {
         mSharedPref = context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
     }
 
-    public  void saveLogin(String login) {
+    void saveLogin(String login) {
         SharedPreferences.Editor editor = mSharedPref.edit();
         editor.putString(APP_PREFERENCES_LOGIN, login);
         editor.apply();
     }
 
-    public void saveKey(String key) {
+    void saveKey(String key) {
         SharedPreferences.Editor editor = mSharedPref.edit();
         editor.putString(APP_PREFERENCES_MASTER_KEY, key);
         editor.apply();

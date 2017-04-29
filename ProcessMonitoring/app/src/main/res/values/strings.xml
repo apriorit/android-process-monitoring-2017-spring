@@ -20,6 +20,7 @@
     <string name="hint_key_verify">Master key verify</string>
     <string name="next_step">Next</string>
     <string name="title_activity_authentication">AuthenticationActivity</string>
-
+    <string name="sender_email">process.monitoring2017@gmail.com</string>
+    <string name="sender_password">"c534r2086d"</string>
     <string name="sign_out">Sign out</string>
 </resources>

@@ -8,10 +8,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.apriorit.android.processmonitoring.lock.EnableAppActivity;
 import com.apriorit.android.processmonitoring.registration.SharedPreferencesHandler;
 
 public class Lock extends AppCompatActivity {
-
     private EditText mInputMasterKey;
     private SharedPreferencesHandler mSharedPref;
 
@@ -47,7 +47,7 @@ public class Lock extends AppCompatActivity {
         String correctKey = mSharedPref.getMasterKey();
 
         //check if user entered correct master key
-        if(masterKey.equals(correctKey)) {
+        if (masterKey.equals(correctKey)) {
             Intent intentUpdateAccessibility = new Intent("UPDATE_BLACKLIST");
             intentUpdateAccessibility.putExtra("update_type", "once");
             sendBroadcast(intentUpdateAccessibility);
@@ -55,5 +55,10 @@ public class Lock extends AppCompatActivity {
         } else {
             Toast.makeText(getApplicationContext(), "Wrong key!", Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void enableProcessMonitoring(View v) {
+        Intent intent = new Intent(Lock.this, EnableAppActivity.class);
+        startActivity(intent);
     }
 }

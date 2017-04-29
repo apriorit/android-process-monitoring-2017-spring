@@ -45,6 +45,7 @@ public class Accessibility extends AccessibilityService {
         List<CharSequence> wordsInWindow = event.getText();
         Log.d(TAG, String.format("packageName: %s  className %s eventType %s text %s", event.getPackageName(), event.getClassName(), event.getEventType(), event.getText()));
 
+
         //name apps in settings
         Boolean flagIsLock = false;
         Iterator<CharSequence> iter = wordsInWindow.iterator();
@@ -59,7 +60,6 @@ public class Accessibility extends AccessibilityService {
 
         String eventPackage = String.valueOf(event.getPackageName());
         Log.d(TAG, eventPackage);
-
         DatabaseHandler db = new DatabaseHandler(this);
         List<AppData> blackList = db.getAllApps();
 
@@ -89,7 +89,6 @@ public class Accessibility extends AccessibilityService {
 
     @Override
     protected void onServiceConnected() {
-
         super.onServiceConnected();
         info = new AccessibilityServiceInfo();
         info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | AccessibilityEvent.TYPE_VIEW_CLICKED;

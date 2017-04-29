@@ -48,7 +48,6 @@
             android:onClick="controlOtherDevices"
             android:text="Control other devices"
             android:gravity="center"/>
-
     </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

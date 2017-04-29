@@ -218,10 +218,8 @@ public class DatabaseHandler {
 			preparedStatement.setString(1, mLogin);
 
 			ResultSet rs = preparedStatement.executeQuery();
-			System.out.println("DatabaseHandler----------- ::: " + mLogin);
 			while (rs.next()) {
 				String password = rs.getString("password");
-				System.out.println("password ::: " + password);
 				if (password.equals(mPassword)) {
 					return true;
 				}
