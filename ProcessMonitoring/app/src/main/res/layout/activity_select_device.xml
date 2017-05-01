@@ -22,4 +22,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="openDialogFragment"/>
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/checkbox_hide_app"
+        android:text="Hide application">
+    </CheckBox>
 </LinearLayout>

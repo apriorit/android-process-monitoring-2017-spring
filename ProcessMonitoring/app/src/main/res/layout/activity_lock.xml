@@ -36,20 +36,6 @@
             android:textColor="@color/btn_login"
             android:onClick="unlockApp"
             android:gravity="center"/>
-
-
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dip"
-            android:background="@null"
-            android:text="Enable application"
-            android:textAllCaps="false"
-            android:textColor="@color/white"
-            android:textSize="15dp"
-            android:onClick="enableProcessMonitoring"
-            android:gravity="center"/>
-
     </LinearLayout>
 
 </RelativeLayout>

@@ -128,7 +128,5 @@ public class DeviceManagementActivity extends AppCompatActivity {
         Intent intent = new Intent(DeviceManagementActivity.this, ViewFilesActivity.class);
         intent.putExtra("user-id", mUserID);
         DeviceManagementActivity.this.startActivity(intent);
-
-
     }
 }

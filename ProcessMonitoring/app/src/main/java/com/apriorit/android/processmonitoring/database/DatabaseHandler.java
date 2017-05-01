@@ -22,6 +22,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements IDatabaseHandle
     private static final String KEY_PACKAGE_NAME = "package_name";
     private static final String KEY_APP_NAME = "app_name";
     private static final String KEY_BLOCKED = "blocked";
+
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -30,7 +31,7 @@ public class DatabaseHandler extends SQLiteOpenHelper implements IDatabaseHandle
     public void onCreate(SQLiteDatabase db) {
         String CREATE_BLACKLIST_TABLE = "CREATE TABLE " + TABLE_BLACKLIST + "("
                 + KEY_ID + " INTEGER PRIMARY KEY," + KEY_PACKAGE_NAME + " TEXT NOT NULL UNIQUE ,"
-                + KEY_APP_NAME + " TEXT, " + KEY_BLOCKED + " INTEGER " +  ")";
+                + KEY_APP_NAME + " TEXT, " + KEY_BLOCKED + " INTEGER " + ")";
         db.execSQL(CREATE_BLACKLIST_TABLE);
     }
 
@@ -45,9 +46,9 @@ public class DatabaseHandler extends SQLiteOpenHelper implements IDatabaseHandle
     public void addApplicationData(AppData app) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(KEY_PACKAGE_NAME , app.getPackageName());
-        values.put(KEY_APP_NAME , app.getAppName());
-        values.put(KEY_BLOCKED , app.isBlocked());
+        values.put(KEY_PACKAGE_NAME, app.getPackageName());
+        values.put(KEY_APP_NAME, app.getAppName());
+        values.put(KEY_BLOCKED, app.isBlocked());
         db.insertWithOnConflict(TABLE_BLACKLIST, null, values, SQLiteDatabase.CONFLICT_IGNORE);
         db.close();
     }
@@ -56,39 +57,48 @@ public class DatabaseHandler extends SQLiteOpenHelper implements IDatabaseHandle
     public AppData getApplication(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_BLACKLIST, new String[] { KEY_ID,
-                        KEY_PACKAGE_NAME, KEY_APP_NAME, KEY_BLOCKED }, KEY_ID + "=?",
-                new String[] { String.valueOf(id) }, null, null, null, null);
-
-        if (cursor != null){
-            cursor.moveToFirst();
+        Cursor cursor = db.query(TABLE_BLACKLIST, new String[]{KEY_ID,
+                        KEY_PACKAGE_NAME, KEY_APP_NAME, KEY_BLOCKED}, KEY_ID + "=?",
+                new String[]{String.valueOf(id)}, null, null, null, null);
+        AppData app = null;
+        try {
+            if (cursor != null) {
+                cursor.moveToFirst();
+            }
+            app = new AppData(Integer.parseInt(cursor.getString(0)), cursor.getString(1), cursor.getString(2), cursor.getInt(3));
+            cursor.close();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
         }
-
-        AppData app = new AppData(Integer.parseInt(cursor.getString(0)), cursor.getString(1), cursor.getString(2), cursor.getInt(3));
         return app;
     }
 
     @Override
     public List<AppData> getAllApps() {
-        List<AppData> appList = new ArrayList<AppData>();
+        List<AppData> appList = new ArrayList<>();
         String selectQuery = "SELECT  * FROM " + TABLE_BLACKLIST;
-
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                AppData app = new AppData();
-                app.setID(Integer.parseInt(cursor.getString(0)));
-                app.setPackageName(cursor.getString(1));
-                app.setAppName(cursor.getString(2));
-                app.setAccess(cursor.getInt(3));
-                appList.add(app);
-            } while (cursor.moveToNext());
+        try {
+            if (cursor.moveToFirst()) {
+                do {
+                    AppData app = new AppData();
+                    app.setID(Integer.parseInt(cursor.getString(0)));
+                    app.setPackageName(cursor.getString(1));
+                    app.setAppName(cursor.getString(2));
+                    app.setAccess(cursor.getInt(3));
+                    appList.add(app);
+                } while (cursor.moveToNext());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            cursor.close();
         }
 
         return appList;
     }
+
     public int getCountOfBlockedApps() {
         String selectQuery = "SELECT  * FROM " + TABLE_BLACKLIST;
 
@@ -105,33 +115,36 @@ public class DatabaseHandler extends SQLiteOpenHelper implements IDatabaseHandle
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_PACKAGE_NAME , app.getPackageName());
-        values.put(KEY_APP_NAME , app.getAppName());
-        values.put(KEY_BLOCKED , app.isBlocked());
+        values.put(KEY_PACKAGE_NAME, app.getPackageName());
+        values.put(KEY_APP_NAME, app.getAppName());
+        values.put(KEY_BLOCKED, app.isBlocked());
 
         return db.update(TABLE_BLACKLIST, values, KEY_ID + " = ?",
-                new String[] { String.valueOf(app.getID()) });
+                new String[]{String.valueOf(app.getID())});
     }
 
     @Override
     public void deleteApplicationData(AppData app) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_BLACKLIST, KEY_ID + " = ?", new String[] { String.valueOf(app.getID()) });
+        db.delete(TABLE_BLACKLIST, KEY_ID + " = ?", new String[]{String.valueOf(app.getID())});
         db.close();
     }
+
     public void deleteAppByPackage(String packageName) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_BLACKLIST, KEY_PACKAGE_NAME + " = ?", new String[] { packageName });
+        db.delete(TABLE_BLACKLIST, KEY_PACKAGE_NAME + " = ?", new String[]{packageName});
         db.close();
     }
+
     @Override
     public void deleteAll() {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_BLACKLIST, null, null);
         db.close();
     }
+
     public void clearBlacklist() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("delete from "+ TABLE_BLACKLIST);
+        db.execSQL("delete from " + TABLE_BLACKLIST);
     }
 }

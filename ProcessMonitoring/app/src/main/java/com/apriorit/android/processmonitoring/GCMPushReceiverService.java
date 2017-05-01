@@ -62,10 +62,9 @@ public class GCMPushReceiverService extends GcmListenerService {
                         case "update-blacklist":
                             //update database
                             handler.updateBlacklistInDB(data.getString("LIST_APPS"));
-                            intentUpdateList = new Intent("UPDATE_BLACKLIST");
-                            intentUpdateList.putExtra("update_type", "multiple");
-                            //notificate accessibility service to update blacklist
-                            sendBroadcast(intentUpdateList);
+                            Intent intentUpdateAccessibility = new Intent("UPDATE_BLACKLIST");
+                            intentUpdateAccessibility.putExtra("disable", "update_list");
+                            sendBroadcast(intentUpdateAccessibility);
                             break;
                         case "list-devices":
                             intentUpdateList = new Intent("LIST_DEVICES");
@@ -77,6 +76,7 @@ public class GCMPushReceiverService extends GcmListenerService {
                             break;
                         case "enable-app":
                             handler.setEnabledSettings(true);
+                            handler.disableAccessibilityService();
                             break;
                         default:
                             break;

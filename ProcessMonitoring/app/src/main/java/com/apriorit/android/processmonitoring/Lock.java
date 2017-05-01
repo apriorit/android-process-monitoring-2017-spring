@@ -14,6 +14,7 @@ import com.apriorit.android.processmonitoring.registration.SharedPreferencesHand
 public class Lock extends AppCompatActivity {
     private EditText mInputMasterKey;
     private SharedPreferencesHandler mSharedPref;
+    String mPackageName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +23,9 @@ public class Lock extends AppCompatActivity {
 
         mSharedPref = new SharedPreferencesHandler(this);
         mInputMasterKey = (EditText) findViewById(R.id.inputKey);
+        Intent intent = getIntent();
+        //defines if user will control other devices
+        mPackageName = intent.getStringExtra("packageName");
     }
 
     @Override
@@ -49,16 +53,11 @@ public class Lock extends AppCompatActivity {
         //check if user entered correct master key
         if (masterKey.equals(correctKey)) {
             Intent intentUpdateAccessibility = new Intent("UPDATE_BLACKLIST");
-            intentUpdateAccessibility.putExtra("update_type", "once");
-            sendBroadcast(intentUpdateAccessibility);
             finish();
+            intentUpdateAccessibility.putExtra("disable", mPackageName);
+            sendBroadcast(intentUpdateAccessibility);
         } else {
             Toast.makeText(getApplicationContext(), "Wrong key!", Toast.LENGTH_LONG).show();
         }
-    }
-
-    public void enableProcessMonitoring(View v) {
-        Intent intent = new Intent(Lock.this, EnableAppActivity.class);
-        startActivity(intent);
     }
 }

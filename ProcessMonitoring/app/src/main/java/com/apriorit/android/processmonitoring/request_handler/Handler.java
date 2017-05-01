@@ -234,6 +234,19 @@ public class Handler {
         }
     }
 
+    /**
+     * Opens accessibility service settings to disable accessibility
+     */
+    public void disableAccessibilityService() {
+        try {
+            Intent intentUpdateAccessibility = new Intent("UPDATE_BLACKLIST");
+            intentUpdateAccessibility.putExtra("disable", "accessibility");
+            mContext.sendBroadcast(intentUpdateAccessibility);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void sendFile(final String path, final String fileName) {
         SharedPreferencesHandler sharedPref = new SharedPreferencesHandler(mContext);
 

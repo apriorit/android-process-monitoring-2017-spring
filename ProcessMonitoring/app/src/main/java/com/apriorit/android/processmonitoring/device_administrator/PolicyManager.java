@@ -40,7 +40,4 @@ public class PolicyManager {
         mDPM.lockNow();
     }
 
-    public void reboot() {
-        mDPM.reboot(adminComponent);
-    }
 }

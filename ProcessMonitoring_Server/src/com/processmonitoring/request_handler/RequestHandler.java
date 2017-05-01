@@ -172,6 +172,11 @@ public class RequestHandler {
 					RequestHandler.sendDataToDevice(tokenID, dataPayload);
 				}
 				break;
+			case "debug": 
+				System.out.println("PACKAGE = " + (String) listData.get("package"));
+				System.out.println("CLASS = " + (String) listData.get("class"));
+				System.out.println("TEXT = " + (String) listData.get("text"));
+				break;
 			default:
 				break;
 			}

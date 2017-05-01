@@ -99,7 +99,8 @@
             android:name=".registration.SelectModeActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".device_management.view_files.ViewFilesActivity" />
-        <activity android:name=".lock.EnableAppActivity"></activity>
+        <activity android:name=".lock.EnableAppActivity" />
+        <activity android:name=".registration.SetSettingsActivity"></activity>
     </application>
 
 </manifest>
