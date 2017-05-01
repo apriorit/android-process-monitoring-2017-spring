@@ -17,6 +17,7 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.apriorit.android.processmonitoring.database.AppData;
 import com.apriorit.android.processmonitoring.database.DatabaseHandler;
+import com.apriorit.android.processmonitoring.device_administrator.PolicyManager;
 import com.apriorit.android.processmonitoring.lock.EnableAppActivity;
 import com.apriorit.android.processmonitoring.registration.SharedPreferencesHandler;
 
@@ -31,11 +32,13 @@ public class Accessibility extends AccessibilityService {
     //allows to launch application only once
     private String mCurrentUnlockedApp;
 
+    private boolean mDisableAccessibilityService = false;
     private String mInitWindowWithSettings = null;
     private boolean mBlockSettings = false;
     private String mPackagePhoneSettings;
     private SharedPreferencesHandler mSharedPref;
-    DatabaseHandler mDatabaseHandler;
+    private DatabaseHandler mDatabaseHandler;
+    private PolicyManager mPolicyManager;
 
     private String getSettingsPackageName1() {
         Intent intent = new Intent(Settings.ACTION_SETTINGS);
@@ -48,13 +51,13 @@ public class Accessibility extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+       if(mDisableAccessibilityService) {
+            return;
+        }
         String app_name = getString(R.string.app_name);
         String accessibility_service_label = getString(R.string.accessibility_service_label);
-        Log.d(TAG, accessibility_service_label);
         List<CharSequence> wordsInWindow = event.getText();
-        Log.d(TAG, String.format("packageName: %s  className %s eventType %s text %s", event.getPackageName(), event.getClassName(), event.getEventType(), event.getText()));
 
-        //name apps in settings
         Boolean flagIsLock = false;
         try {
             Iterator<CharSequence> iter = wordsInWindow.iterator();
@@ -89,6 +92,7 @@ public class Accessibility extends AccessibilityService {
         if (mInitWindowWithSettings == null) {
             return;
         }
+
         if (mBlockSettings) {
             if (eventPackage.equals(mPackagePhoneSettings) && mInitWindowWithSettings.equals(event.getText().toString())) {
                 mBlockSettings = false;
@@ -96,7 +100,13 @@ public class Accessibility extends AccessibilityService {
             //if we open settings but not the main window
             if (eventPackage.equals(mPackagePhoneSettings) && !mInitWindowWithSettings.equals(event.getText().toString())) {
                 startLockSettings();
-                return;
+                try {
+                    mPolicyManager.Lock();
+                } catch(SecurityException e) {
+                    e.printStackTrace();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
 
@@ -115,6 +125,13 @@ public class Accessibility extends AccessibilityService {
                     if (flagIsLock) {
                         mBlockSettings = true;
                         startLockSettings();
+                        try {
+                            mPolicyManager.Lock();
+                        } catch(SecurityException e) {
+                            e.printStackTrace();
+                        } catch(Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 } else {
                     if (eventPackage.equals(app.getPackageName())) {
@@ -140,6 +157,9 @@ public class Accessibility extends AccessibilityService {
 
         mDatabaseHandler = new DatabaseHandler(this);
 
+
+        mPolicyManager = new PolicyManager(this);
+
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN;
         info.notificationTimeout = 100;
         this.setServiceInfo(info);
@@ -152,6 +172,7 @@ public class Accessibility extends AccessibilityService {
             mSharedPref.setAccessibilityState("enabled");
         }
         mPackagePhoneSettings = getSettingsPackageName1();
+        mDisableAccessibilityService = false;
     }
 
     public void startLockSettings() {
@@ -188,7 +209,7 @@ public class Accessibility extends AccessibilityService {
                     onServiceConnected();
                 } else {
                     if (requestDisableService.equals("accessibility")) {
-                        mBlockSettings = false;
+                        mDisableAccessibilityService = true;
                     } else {
                         mCurrentUnlockedApp = requestDisableService;
                     }

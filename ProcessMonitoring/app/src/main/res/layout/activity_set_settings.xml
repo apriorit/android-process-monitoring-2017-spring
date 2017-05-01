@@ -13,6 +13,11 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Activate administrator mode"
+        android:onClick="activateAdmin"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Activate Accessibility"
         android:onClick="activateAccessibility"/>
 </RelativeLayout>
