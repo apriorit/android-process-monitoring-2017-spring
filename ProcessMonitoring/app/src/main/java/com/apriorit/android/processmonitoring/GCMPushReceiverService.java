@@ -23,7 +23,6 @@ public class GCMPushReceiverService extends GcmListenerService {
         super.onMessageReceived(from, data);
         Intent intentUpdateList;
         if (data != null) {
-            //sendNotification(data.getString("LIST_APPS"));
             Handler handler = new Handler(this);
             try {
                 String type = data.getString("requestType");
@@ -57,7 +56,14 @@ public class GCMPushReceiverService extends GcmListenerService {
                             handler.sendListFiles(data.getString("token"), data.getString("directory"));
                             break;
                         case "location":
-                            handler.HandleDeviceLocation();
+                            String state = data.getString("state");
+                            if (state != null) {
+                                if (state.equals("start")) {
+                                    handler.startSendingCoordinates(data.getString("user-id"));
+                                } else {
+                                    handler.stopSendingCoordinates();
+                                }
+                            }
                             break;
                         case "update-blacklist":
                             //update database

@@ -55,6 +55,25 @@ public class DatabaseHandler {
 
 			mStatement.executeUpdate(sql);
 
+			sql = "CREATE TABLE IF NOT EXISTS process_monitoring_database.location ( "
+					+ " location_id INT NOT NULL AUTO_INCREMENT, "
+					  + " user_id INT NOT NULL, "
+					  + " time VARCHAR(45) NOT NULL, "
+					 + " latitude DOUBLE NOT NULL, "
+					  + " longtitude DOUBLE NOT NULL, "
+					  + " PRIMARY KEY (location_id), "
+					  + " UNIQUE INDEX location_id_UNIQUE (location_id ASC), "
+					  + " INDEX user_id_idx (user_id ASC), "
+					  + " CONSTRAINT user_id "
+					    + " FOREIGN KEY (user_id) "
+					    + " REFERENCES process_monitoring_database.devices (user_id) "
+					    + " ON DELETE NO ACTION "
+					    + " ON UPDATE NO ACTION) "
+					+ " ENGINE = InnoDB "
+					+ " DEFAULT CHARACTER SET = utf8;";
+
+			mStatement.executeUpdate(sql);
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -94,6 +113,19 @@ public class DatabaseHandler {
 		}
 	}
 
+	public static void addLocation(int userID, String time, double latitude, double longtitude) {
+		String sql = "INSERT INTO process_monitoring_database.location (user_id, time, latitude, longtitude) VALUES (?, ?, ?, ?);";
+		try {
+			preparedStatement = mConnection.prepareStatement(sql);
+			preparedStatement.setInt(1, userID);
+			preparedStatement.setString(1, time);
+			preparedStatement.setDouble(2, latitude);
+			preparedStatement.setDouble(3, longtitude);
+			preparedStatement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 	private static int getAccountID(String login) {
 		int accountID = -1;
 		try {
@@ -266,5 +298,25 @@ public class DatabaseHandler {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	public static Map<String, Double> getListCoordinates(int userID, int type) {
+		Map<String, Double> coordinates = new HashMap<String, Double>();
+		try {
+			String sql = "SELECT * FROM process_monitoring_database.location WHERE user_id=?";
+			preparedStatement = mConnection.prepareStatement(sql);
+			preparedStatement.setInt(1, userID);
+
+			ResultSet rs = preparedStatement.executeQuery();
+			while (rs.next()) {
+				if(type == 0) {
+					coordinates.put(rs.getString(3), rs.getDouble(4));
+				} else {
+					coordinates.put(rs.getString(3), rs.getDouble(5));
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return coordinates;
 	}
 }

@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.apriorit.android.processmonitoring.lock.EnableAppActivity;
 import com.apriorit.android.processmonitoring.registration.SharedPreferencesHandler;
 
 public class Lock extends AppCompatActivity {
@@ -49,7 +48,6 @@ public class Lock extends AppCompatActivity {
     public void unlockApp(View v) {
         String masterKey = mInputMasterKey.getText().toString();
         String correctKey = mSharedPref.getMasterKey();
-
         //check if user entered correct master key
         if (masterKey.equals(correctKey)) {
             Intent intentUpdateAccessibility = new Intent("UPDATE_BLACKLIST");

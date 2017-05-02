@@ -5,9 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Looper;
 import android.provider.Settings;
 import android.widget.Toast;
 
@@ -28,13 +32,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Handler {
+public class Handler implements LocationListener {
     private Context mContext;
     private DatabaseHandler mDatabaseHandler;
+    private LocationManager locationManager;
+    private boolean mSendCoordinatesToServer1;
 
     public Handler(Context context) {
         mContext = context;
         mDatabaseHandler = new DatabaseHandler(mContext);
+        mSendCoordinatesToServer1 = false;
+        // mDeviceLocation = new DeviceLocation(context);
     }
 
     /**
@@ -94,13 +102,6 @@ public class Handler {
         data.putString("login", login);
         data.putString("password", password);
         SendDataToServer(data);
-    }
-
-    /**
-     * Gets coordinates and sends it to GCM server
-     */
-    public void HandleDeviceLocation() {
-
     }
 
     /**
@@ -245,6 +246,51 @@ public class Handler {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Gets coordinates and sends it to GCM server
+     */
+    public void startSendingCoordinates(String userID) {
+        mSendCoordinatesToServer1 = true;
+        locationManager =
+                (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        try {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000 * 3, 0, this, Looper.getMainLooper());
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void stopSendingCoordinates() {
+        mSendCoordinatesToServer1 = false;
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        double mLatitude = location.getLatitude();
+        double mLongtitude = location.getLongitude();
+
+        if (mSendCoordinatesToServer1) {
+            Bundle data = new Bundle();
+            data.putString("requestType", "location");
+            data.putString("user-id", "1");
+            data.putString("latitude", String.valueOf(mLatitude));
+            data.putString("longtitude", String.valueOf(mLongtitude));
+            SendDataToServer(data);
+        }
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
     }
 
     public void sendFile(final String path, final String fileName) {

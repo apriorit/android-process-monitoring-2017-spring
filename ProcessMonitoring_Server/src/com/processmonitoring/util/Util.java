@@ -10,6 +10,7 @@ public class Util {
 
 	// For the GCM connection
 	public static final String FCM_SERVER = "fcm-xmpp.googleapis.com";
+	//public static final String FCM_SERVER = "gcm-xmpp.googleapis.com";
 	public static final int FCM_PORT = 5236;
 	public static final String FCM_ELEMENT_NAME = "gcm";
 	public static final String FCM_NAMESPACE = "google:mobile:data";

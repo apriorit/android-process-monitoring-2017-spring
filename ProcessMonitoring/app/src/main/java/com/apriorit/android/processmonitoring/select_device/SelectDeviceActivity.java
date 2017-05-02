@@ -30,8 +30,6 @@ public class SelectDeviceActivity extends AppCompatActivity {
 
     private String mMode;
     private String mLogin;
-
-    private CheckBox mCheckBoxHideApp;
     private List<DeviceModel> mListDevices;
     private ListView mListViewDevices;
 
@@ -41,8 +39,6 @@ public class SelectDeviceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_device);
-
-        mCheckBoxHideApp = (CheckBox) findViewById(R.id.checkbox_hide_app);
 
         mDialogNewDevice = new DialogAddDevice();
         mRequestHander = new Handler(this);
@@ -93,9 +89,7 @@ public class SelectDeviceActivity extends AppCompatActivity {
                         SelectDeviceActivity.this.startActivity(intent);
                     } else {
                         sendDeviceInfoToServer(userID);
-                        if (mCheckBoxHideApp.isChecked()) {
-                            mRequestHander.setEnabledSettings(false);
-                        }
+
                         //open settings to enable accessibility service
                         Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
                         startActivityForResult(intent, 0);

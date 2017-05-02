@@ -45,7 +45,7 @@ public class ProcessMonitoringHttpServer {
 	        	InputStreamReader isr =  new InputStreamReader(t.getRequestBody(),"utf-8");
 	        	BufferedReader br = new BufferedReader(isr);
 	        	String requestFromDesktopClient = br.readLine();
-	        	System.out.println("Message from desktop client5: " + requestFromDesktopClient);
+	        	System.out.println("Message from desktop client: " + requestFromDesktopClient);
 	        	
 	        	//RequestHandler.sendResponseToDevice("requestListApps", requestFromDesktopClient);
 	        	

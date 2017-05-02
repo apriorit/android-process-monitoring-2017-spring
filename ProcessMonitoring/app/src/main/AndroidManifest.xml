@@ -100,7 +100,8 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".device_management.view_files.ViewFilesActivity" />
         <activity android:name=".lock.EnableAppActivity" />
-        <activity android:name=".registration.SetSettingsActivity"></activity>
+        <activity android:name=".registration.SetSettingsActivity" />
+        <activity android:name=".device_management.ViewLocationActivity"></activity>
     </application>
 
 </manifest>

@@ -38,15 +38,15 @@ public class AuthenticationActivity extends AppCompatActivity {
         mSharedPref = new SharedPreferencesHandler(this);
 
         String accessibilityState = mSharedPref.getAccessibiltiyState();
-        if (accessibilityState != null) {
-            if (accessibilityState.equals("enabled")) {
-                Intent intentSettings = new Intent(AuthenticationActivity.this, SetSettingsActivity.class);
-                startActivity(intentSettings);
-            } else {
-                String login = mSharedPref.getLogin();
-                if (login != null) {
-                    openSelectModeActivity(login);
-                }
+        String login = mSharedPref.getLogin();
+        if (accessibilityState != null && accessibilityState.equals("enabled")) {
+            //User has to finish configuration
+            Intent intentSettings = new Intent(AuthenticationActivity.this, SetSettingsActivity.class);
+            startActivity(intentSettings);
+        } else {
+            //If we have saved login in shared preferences - open SelectModeActivity
+            if (login != null) {
+                openSelectModeActivity(login);
             }
         }
     }

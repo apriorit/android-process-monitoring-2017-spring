@@ -1,5 +1,8 @@
 package com.processmonitoring.request_handler;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,20 +39,20 @@ public class RequestHandler {
 			case "user-authentication":
 				login = (String) listData.get("login");
 				password = (String) listData.get("password");
-				
+
 				dataPayload.put("requestType", "user-authentication");
 				if (DatabaseHandler.checkAuthentication(login, password)) {
 					String masterKey = DatabaseHandler.getMasterKey(login);
 					dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, masterKey);
 				} else {
-					dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, "failed");				
+					dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, "failed");
 				}
 				RequestHandler.sendDataToDevice(tokenID, dataPayload);
 				break;
 			case "account_registration":
 				login = (String) listData.get("login");
 				dataPayload.put("requestType", "account_registration");
-				
+
 				if (DatabaseHandler.checkRegistration(login)) {
 					DatabaseHandler.addAccount(login, (String) listData.get("password"), (String) listData.get("key"));
 					dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, "success");
@@ -89,7 +92,7 @@ public class RequestHandler {
 				break;
 			case "update-blacklist":
 				userID = Integer.parseInt((String) listData.get("user-id"));
-				
+
 				// update only apps list in specific row in mysql database
 				DatabaseHandler.updateListApps(userID, data);
 				// Send new list of apps to specific android device
@@ -100,7 +103,6 @@ public class RequestHandler {
 					if (!entry.getKey().equals("requestType") && !entry.getKey().equals("user-id")) {
 						jsonListApps2.put(entry.getKey(), entry.getValue());
 					}
-
 				}
 				dataPayload.put("requestType", "update-blacklist");
 				dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, jsonListApps2.toString());
@@ -109,7 +111,7 @@ public class RequestHandler {
 			case "update-list":
 				userID = Integer.parseInt((String) listData.get("user-id"));
 				token = DatabaseHandler.getToken(userID);
-			
+
 				dataPayload.put("requestType", "update-list");
 				dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, (String) listData.get("user-id"));
 				RequestHandler.sendDataToDevice(token, dataPayload);
@@ -117,7 +119,7 @@ public class RequestHandler {
 			case "get-file":
 				userID = Integer.parseInt((String) listData.get("user-id"));
 				token = DatabaseHandler.getToken(userID);
-				
+
 				dataPayload.put("requestType", "get-file");
 				dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, (String) listData.get("user-id"));
 				RequestHandler.sendDataToDevice(token, dataPayload);
@@ -130,7 +132,7 @@ public class RequestHandler {
 				userID = Integer.parseInt((String) listData.get("user-id"));
 				token = DatabaseHandler.getToken(userID);
 				String directory = (String) listData.get("directory");
-				
+
 				dataPayload.put("requestType", "get-list-files");
 				dataPayload.put("directory", directory);
 				dataPayload.put("token", tokenID);
@@ -138,7 +140,7 @@ public class RequestHandler {
 				break;
 			case "list-files":
 				String tokenSender = (String) listData.get("token");
-				
+
 				Map<String, Object> mapListFiles = (Map<String, Object>) JSONValue.parseWithException(data);
 				JSONObject jsonListFiles = new JSONObject();
 				for (Map.Entry<String, Object> entry : mapListFiles.entrySet()) {
@@ -149,33 +151,43 @@ public class RequestHandler {
 				dataPayload.put("requestType", "list-files");
 				dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, jsonListFiles.toString());
 				RequestHandler.sendDataToDevice(tokenSender, dataPayload);
-				
+
 				break;
 			case "send-file":
 				userID = Integer.parseInt((String) listData.get("user-id"));
 				token = DatabaseHandler.getToken(userID);
 				String path = (String) listData.get("directory");
 				String fileName = (String) listData.get("filename");
-				
+
 				dataPayload.put("requestType", "send-file");
 				dataPayload.put("filename", fileName);
 				dataPayload.put(Util.PAYLOAD_ATTRIBUTE_MESSAGE, path);
-				
+
 				RequestHandler.sendDataToDevice(token, dataPayload);
 				break;
 			case "enable-app":
 				login = (String) listData.get("login");
 				password = (String) listData.get("password");
-				
+
 				if (DatabaseHandler.checkAuthentication(login, password)) {
 					dataPayload.put("requestType", "enable-app");
 					RequestHandler.sendDataToDevice(tokenID, dataPayload);
 				}
 				break;
-			case "debug": 
-				System.out.println("PACKAGE = " + (String) listData.get("package"));
-				System.out.println("CLASS = " + (String) listData.get("class"));
-				System.out.println("TEXT = " + (String) listData.get("text"));
+			case "location":
+				int deviceID = Integer.parseInt((String) listData.get("user-id"));
+				double latitude = Double.parseDouble((String) listData.get("latitude"));
+				double longtitude = Double.parseDouble((String) listData.get("longtitude"));
+				
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Date date = new Date();
+				
+				String time = dateFormat.format(date);
+				System.out.println("user id = " + deviceID);
+				System.out.println("latitude = " + latitude);
+				System.out.println("longtitude = " + longtitude);
+				System.out.println("time = " + time);
+				DatabaseHandler.addLocation(deviceID, time, latitude, longtitude);
 				break;
 			default:
 				break;
