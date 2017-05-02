@@ -5,18 +5,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
 
-import com.apriorit.android.processmonitoring.database.DatabaseHandler;
+import com.apriorit.android.processmonitoring.registration.SharedPreferencesHandler;
 
 public class Lock extends AppCompatActivity {
-    private String mPackageName;
+    private EditText mInputMasterKey;
+    private SharedPreferencesHandler mSharedPref;
+    String mPackageName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lock);
 
+        mSharedPref = new SharedPreferencesHandler(this);
+        mInputMasterKey = (EditText) findViewById(R.id.inputKey);
         Intent intent = getIntent();
+        //defines if user will control other devices
         mPackageName = intent.getStringExtra("packageName");
     }
 
@@ -39,8 +46,16 @@ public class Lock extends AppCompatActivity {
     }
 
     public void unlockApp(View v) {
-        DatabaseHandler db = new DatabaseHandler(this);
-        db.deleteAppByPackage(mPackageName);
-        finish();
+        String masterKey = mInputMasterKey.getText().toString();
+        String correctKey = mSharedPref.getMasterKey();
+        //check if user entered correct master key
+        if (masterKey.equals(correctKey)) {
+            Intent intentUpdateAccessibility = new Intent("UPDATE_BLACKLIST");
+            finish();
+            intentUpdateAccessibility.putExtra("disable", mPackageName);
+            sendBroadcast(intentUpdateAccessibility);
+        } else {
+            Toast.makeText(getApplicationContext(), "Wrong key!", Toast.LENGTH_LONG).show();
+        }
     }
 }

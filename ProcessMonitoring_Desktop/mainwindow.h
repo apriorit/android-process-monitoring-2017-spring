@@ -33,6 +33,7 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    QPushButton *btnGetListDevices;
     QPushButton *btnSendRequest;
     QPushButton *btnSetCoordinates;
     //This class allows the application to send network requests and receive replies
@@ -40,10 +41,12 @@ private:
     QLabel *label;
     QQuickView *view;
     QQuickItem *item;
+
 private slots:
     void Response(QNetworkReply* reply);
-    void sendRequest();
+    void sendRequest(QString);
     void showMap();
+    void listDevices();
 };
 
 #endif // MAINWINDOW_H

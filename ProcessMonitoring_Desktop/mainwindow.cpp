@@ -6,17 +6,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    btnGetListDevices = new QPushButton("Authentication", this);
+    btnGetListDevices->setGeometry(QRect(QPoint(10, 50), QSize(100, 30)));
+    connect(btnGetListDevices, SIGNAL(released()), this, SLOT(listDevices()));
+
     btnSendRequest = new QPushButton("Send request", this);
-    btnSendRequest->setGeometry(QRect(QPoint(10, 10), QSize(100, 30)));
+    btnSendRequest->setGeometry(QRect(QPoint(10, 100), QSize(100, 30)));
 
     btnSetCoordinates = new QPushButton("Set coordinates", this);
-    btnSetCoordinates->setGeometry(QRect(QPoint(150, 10), QSize(100, 30)));
+    btnSetCoordinates->setGeometry(QRect(QPoint(150, 100), QSize(100, 30)));
     btnSetCoordinates->setCheckable(true);
 
     connect(btnSetCoordinates, SIGNAL(released()), this, SLOT(showMap()));
 
     //connect the signal to the appropriate slot
-    connect(btnSendRequest, SIGNAL (released()), this, SLOT (sendRequest()));
+    //connect(btnSendRequest, SIGNAL (released()), this, SLOT (sendRequest()));
     manager = new QNetworkAccessManager(this);
 
     label = new QLabel(this);
@@ -41,6 +45,11 @@ MainWindow::MainWindow(QWidget *parent) :
     //coordinates of the marker on this map
     item->setProperty("device_latitude", 48.48508294);
     item->setProperty("device_longitude", 35.08914748);
+
+}
+
+void MainWindow::listDevices() {
+    sendRequest("list-devices");
 }
 
 //Handles response from our App server
@@ -62,7 +71,7 @@ void MainWindow::Response(QNetworkReply *reply){
       }
 }
 //Sends message to our App server
-void MainWindow::sendRequest() {
+void MainWindow::sendRequest(QString typeRequest) {
     QUrl url("http://127.0.0.1:8000"); //192.168.0.101
     url.port(8000);
 
@@ -70,7 +79,7 @@ void MainWindow::sendRequest() {
     QNetworkRequest qNetworkRequest(url);
     qNetworkRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
-    QString request("list-apps");
+    QString request(typeRequest);
     postData.append(request);
     QObject::connect(manager, SIGNAL(finished(QNetworkReply *)), this, SLOT(Response(QNetworkReply *)));
 

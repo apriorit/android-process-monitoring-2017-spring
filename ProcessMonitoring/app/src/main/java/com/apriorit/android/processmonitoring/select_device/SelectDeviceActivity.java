@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
 import android.widget.ListView;
 
 import com.apriorit.android.processmonitoring.R;
@@ -29,7 +30,6 @@ public class SelectDeviceActivity extends AppCompatActivity {
 
     private String mMode;
     private String mLogin;
-
     private List<DeviceModel> mListDevices;
     private ListView mListViewDevices;
 
@@ -89,6 +89,10 @@ public class SelectDeviceActivity extends AppCompatActivity {
                         SelectDeviceActivity.this.startActivity(intent);
                     } else {
                         sendDeviceInfoToServer(userID);
+
+                        //open settings to enable accessibility service
+                        Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                        startActivityForResult(intent, 0);
                     }
                 }
             });

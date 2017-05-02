@@ -17,6 +17,9 @@ import android.view.accessibility.AccessibilityEvent;
 
 import com.apriorit.android.processmonitoring.database.AppData;
 import com.apriorit.android.processmonitoring.database.DatabaseHandler;
+import com.apriorit.android.processmonitoring.device_administrator.PolicyManager;
+import com.apriorit.android.processmonitoring.lock.EnableAppActivity;
+import com.apriorit.android.processmonitoring.registration.SharedPreferencesHandler;
 
 import java.util.Iterator;
 import java.util.List;
@@ -26,7 +29,18 @@ public class Accessibility extends AccessibilityService {
     private static final String TAG = "AccessibilityService";
     private AccessibilityServiceInfo info;
 
-    private String querySettingPkgName() {
+    //allows to launch application only once
+    private String mCurrentUnlockedApp;
+
+    private boolean mDisableAccessibilityService = false;
+    private String mInitWindowWithSettings = null;
+    private boolean mBlockSettings = false;
+    private String mPackagePhoneSettings;
+    private SharedPreferencesHandler mSharedPref;
+    private DatabaseHandler mDatabaseHandler;
+    private PolicyManager mPolicyManager;
+
+    private String getSettingsPackageName1() {
         Intent intent = new Intent(Settings.ACTION_SETTINGS);
         List<ResolveInfo> resolveInfos = getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
         if (resolveInfos == null || resolveInfos.size() == 0) {
@@ -37,40 +51,93 @@ public class Accessibility extends AccessibilityService {
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
+       if(mDisableAccessibilityService) {
+            return;
+        }
         String app_name = getString(R.string.app_name);
         String accessibility_service_label = getString(R.string.accessibility_service_label);
-        Log.d(TAG, accessibility_service_label);
         List<CharSequence> wordsInWindow = event.getText();
-        Log.d(TAG, String.format("packageName: %s  className %s eventType %s text %s", event.getPackageName(), event.getClassName(), event.getEventType(), event.getText()));
 
-        //name apps in settings
         Boolean flagIsLock = false;
-        Iterator<CharSequence> iter = wordsInWindow.iterator();
-        while (iter.hasNext()) {
-            String word = (String) iter.next();
-            Log.d(TAG, word);
-            if (word.equals(app_name) || word.equals(accessibility_service_label)) {
-                flagIsLock = true;
-
+        try {
+            Iterator<CharSequence> iter = wordsInWindow.iterator();
+            while (iter.hasNext()) {
+                String word = (String) iter.next();
+                Log.d(TAG, word);
+                if (word.equals(app_name) || word.equals(accessibility_service_label)) {
+                    flagIsLock = true;
+                }
             }
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         String eventPackage = String.valueOf(event.getPackageName());
-        Log.d(TAG, eventPackage);
+        String state = mSharedPref.getAccessibiltiyState();
 
-        DatabaseHandler db = new DatabaseHandler(this);
-        List<AppData> blackList = db.getAllApps();
+        if (state == null) {
+            return;
+        }
+
+        if (state.equals("activate")) {
+            if (mInitWindowWithSettings == null) {
+                if (eventPackage.equals(mPackagePhoneSettings)) {
+                    mInitWindowWithSettings = event.getText().toString();
+                }
+            }
+        }
+
+        if (mInitWindowWithSettings == null) {
+            return;
+        }
+
+        if (mBlockSettings) {
+            if (eventPackage.equals(mPackagePhoneSettings) && mInitWindowWithSettings.equals(event.getText().toString())) {
+                mBlockSettings = false;
+            }
+            //if we open settings but not the main window
+            if (eventPackage.equals(mPackagePhoneSettings) && !mInitWindowWithSettings.equals(event.getText().toString())) {
+                startLockSettings();
+                try {
+                    mPolicyManager.Lock();
+                } catch(SecurityException e) {
+                    e.printStackTrace();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        List<AppData> blackList = mDatabaseHandler.getAllApps();
+
+        if (mCurrentUnlockedApp != null) {
+            if (!mCurrentUnlockedApp.equals(eventPackage) && !eventPackage.equals(getPackageName())) {
+                mCurrentUnlockedApp = null;
+            }
+        }
 
         //compare current application with blacklist
         for (AppData app : blackList) {
             if (app.isBlocked() == 1) {
-                if (eventPackage.equals(app.getPackageName()) && (app.getPackageName().equals(querySettingPkgName()) || app.getPackageName().equals("com.android.packageinstaller"))) {
+                if (eventPackage.equals(app.getPackageName()) && (app.getPackageName().equals(mPackagePhoneSettings) || app.getPackageName().equals("com.android.packageinstaller"))) {
                     if (flagIsLock) {
-                        startLock(eventPackage);
+                        mBlockSettings = true;
+                        startLockSettings();
+                        try {
+                            mPolicyManager.Lock();
+                        } catch(SecurityException e) {
+                            e.printStackTrace();
+                        } catch(Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 } else {
                     if (eventPackage.equals(app.getPackageName())) {
-                        startLock(eventPackage);
+                        if (mCurrentUnlockedApp == null) {
+                            startLock(eventPackage);
+                        }
                     }
                 }
             }
@@ -84,30 +151,39 @@ public class Accessibility extends AccessibilityService {
 
     @Override
     protected void onServiceConnected() {
-
         super.onServiceConnected();
         info = new AccessibilityServiceInfo();
         info.eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | AccessibilityEvent.TYPE_VIEW_CLICKED;
 
-        DatabaseHandler db = new DatabaseHandler(this);
-        List<AppData> blackList = db.getAllApps();
+        mDatabaseHandler = new DatabaseHandler(this);
 
-        //Updates package names in AccessibilityServiceInfo
-        info.packageNames = new String[db.getCountOfBlockedApps()];
-        int k = 0;
-        for (AppData app : blackList) {
-            if (app.isBlocked() == 1) {
-                info.packageNames[k] = app.getPackageName();
-                k++;
-            }
-        }
+
+        mPolicyManager = new PolicyManager(this);
 
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN;
         info.notificationTimeout = 100;
         this.setServiceInfo(info);
 
-        //register Broadcastreceiver
+        //register BroadcastReceiver
         registerReceiver(receiver, new IntentFilter("UPDATE_BLACKLIST"));
+
+        mSharedPref = new SharedPreferencesHandler(this);
+        if (mSharedPref.getAccessibiltiyState() == null) {
+            mSharedPref.setAccessibilityState("enabled");
+        }
+        mPackagePhoneSettings = getSettingsPackageName1();
+        mDisableAccessibilityService = false;
+    }
+
+    public void startLockSettings() {
+        try {
+            Intent intent = new Intent(Accessibility.this, EnableAppActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     //запускаем окно блокировки
@@ -127,7 +203,18 @@ public class Accessibility extends AccessibilityService {
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onServiceConnected();
+            String requestDisableService = intent.getStringExtra("disable");
+            if (requestDisableService != null) {
+                if (requestDisableService.equals("update_list")) {
+                    onServiceConnected();
+                } else {
+                    if (requestDisableService.equals("accessibility")) {
+                        mDisableAccessibilityService = true;
+                    } else {
+                        mCurrentUnlockedApp = requestDisableService;
+                    }
+                }
+            }
         }
     };
 

@@ -132,7 +132,7 @@ public class XMPPServer implements PacketListener {
 		connection.addPacketWriterInterceptor(new PacketInterceptor() {
 			@Override
 			public void interceptPacket(Packet packet) {
-				System.out.println("INTERCEPT PACKAGE: " + packet.toXML());
+				//System.out.println("INTERCEPT PACKAGE: " + packet.toXML());
 			}
 		}, new PacketTypeFilter(Message.class));
 		connection.login(fcmServerUsername, mApiKey);

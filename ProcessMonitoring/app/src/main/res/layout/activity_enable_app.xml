@@ -13,7 +13,21 @@
         android:paddingRight="20dp" >
 
         <EditText
-            android:id="@+id/inputKey"
+            android:id="@+id/inputMainPassword"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@color/white"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:padding="10dp"
+            android:singleLine="true"
+            android:textColor="@color/input_login"
+            android:textColorHint="@color/input_register_hint"
+            android:gravity="center"/>
+
+        <EditText
+            android:id="@+id/inputMasterKey"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
@@ -27,15 +41,16 @@
             android:gravity="center"/>
 
         <Button
-            android:id="@+id/btn_unlock"
+            android:id="@+id/btn_enable_app"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dip"
             android:background="@color/btn_login_bg"
-            android:text="@string/btn_unlock"
+            android:text="Enable app"
             android:textColor="@color/btn_login"
-            android:onClick="unlockApp"
+            android:onClick="enableApp"
             android:gravity="center"/>
+
     </LinearLayout>
 
 </RelativeLayout>

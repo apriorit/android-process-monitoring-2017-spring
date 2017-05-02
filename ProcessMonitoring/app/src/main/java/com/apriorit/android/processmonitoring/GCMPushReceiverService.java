@@ -1,12 +1,9 @@
 package com.apriorit.android.processmonitoring;
 
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
@@ -25,54 +22,76 @@ public class GCMPushReceiverService extends GcmListenerService {
     public void onMessageReceived(String from, Bundle data) {
         super.onMessageReceived(from, data);
         Intent intentUpdateList;
-        if (data != null)
-            sendNotification(data.getString("LIST_APPS"));
-
-        Handler handler = new Handler(this);
-        try {
-            String type = data.getString("requestType");
-            if (type != null) {
-                switch (type) {
-                    case "list-apps":
-                        //sends downstream message to activity
-                        intentUpdateList = new Intent("LIST_APPS");
-                        intentUpdateList.putExtra("list", data.getString("LIST_APPS"));
-                        sendBroadcast(intentUpdateList);
-                        break;
-                    case "update-list":
-                        handler.sendDeviceInfo(Integer.parseInt(data.getString("LIST_APPS")));
-                        break;
-                    case "location":
-                        handler.HandleDeviceLocation();
-                        break;
-                    case "update-blacklist":
-                        //update dababase
-                        handler.updateBlacklistInDB(data.getString("LIST_APPS"));
-                        intentUpdateList = new Intent("UPDATE_BLACKLIST");
-                        //notificate accessibility service to update blacklist
-                        sendBroadcast(intentUpdateList);
-                        break;
-                    case "list-devices":
-                        intentUpdateList = new Intent("LIST_DEVICES");
-                        intentUpdateList.putExtra("list-devices", data.getString("LIST_APPS"));
-                        sendBroadcast(intentUpdateList);
-                        break;
-                    default:
-                        break;
+        if (data != null) {
+            Handler handler = new Handler(this);
+            try {
+                String type = data.getString("requestType");
+                if (type != null) {
+                    switch (type) {
+                        case "user-authentication":
+                            intentUpdateList = new Intent("authentication");
+                            intentUpdateList.putExtra("status", data.getString("LIST_APPS"));
+                            sendBroadcast(intentUpdateList);
+                            break;
+                        case "account_registration":
+                            intentUpdateList = new Intent("registration");
+                            intentUpdateList.putExtra("status", data.getString("LIST_APPS"));
+                            sendBroadcast(intentUpdateList);
+                            break;
+                        case "list-apps":
+                            //sends downstream message to activity
+                            intentUpdateList = new Intent("LIST_APPS");
+                            intentUpdateList.putExtra("list", data.getString("LIST_APPS"));
+                            sendBroadcast(intentUpdateList);
+                            break;
+                        case "update-list":
+                            handler.sendDeviceInfo(Integer.parseInt(data.getString("LIST_APPS")));
+                            break;
+                        case "list-files":
+                            intentUpdateList = new Intent("LIST_FILES");
+                            intentUpdateList.putExtra("files", data.getString("LIST_APPS"));
+                            sendBroadcast(intentUpdateList);
+                            break;
+                        case "get-list-files":
+                            handler.sendListFiles(data.getString("token"), data.getString("directory"));
+                            break;
+                        case "location":
+                            String state = data.getString("state");
+                            if (state != null) {
+                                if (state.equals("start")) {
+                                    handler.startSendingCoordinates(data.getString("user-id"));
+                                } else {
+                                    handler.stopSendingCoordinates();
+                                }
+                            }
+                            break;
+                        case "update-blacklist":
+                            //update database
+                            handler.updateBlacklistInDB(data.getString("LIST_APPS"));
+                            Intent intentUpdateAccessibility = new Intent("UPDATE_BLACKLIST");
+                            intentUpdateAccessibility.putExtra("disable", "update_list");
+                            sendBroadcast(intentUpdateAccessibility);
+                            break;
+                        case "list-devices":
+                            intentUpdateList = new Intent("LIST_DEVICES");
+                            intentUpdateList.putExtra("list-devices", data.getString("LIST_APPS"));
+                            sendBroadcast(intentUpdateList);
+                            break;
+                        case "send-file":
+                            handler.sendFile(data.getString("LIST_APPS"), data.getString("filename"));
+                            break;
+                        case "enable-app":
+                            handler.setEnabledSettings(true);
+                            handler.disableAccessibilityService();
+                            break;
+                        default:
+                            break;
+                    }
                 }
+            } catch (NullPointerException e) {
+                e.printStackTrace();
             }
-        } catch (NullPointerException e) {
-            e.printStackTrace();
         }
-    }
-
-    /**
-     * Enables specific activity
-     * Shows an application icon in Android application list
-     */
-    public static void setActivityEnabled(Context context, final Class<? extends Activity> activityClass) {
-        final PackageManager pm = context.getPackageManager();
-        pm.setComponentEnabledSetting(new ComponentName(context, activityClass), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
     }
 
     /*
